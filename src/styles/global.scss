@@ -1,0 +1,21 @@
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Hubballi', cursive;
+    // font-family: Avenir, Helvetica, Arial, sans-serif;
+    // -webkit-font-smoothing: antialiased;
+    // -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: $color-text;
+    background-color: $color-background;
+    margin: 0;
+    padding: 0;
+    font-size: 18px;
+}
+
+* {
+    box-sizing: border-box;
+}

@@ -1,5 +1,10 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import './registerServiceWorker'
+import { createApp } from 'vue';
+import App from './app.vue';
+import './registerServiceWorker';
 
-createApp(App).mount('#app')
+import DiceValue from '@/components/dice-value.vue';
+
+createApp(App)
+    // Global components
+    .component('dice', DiceValue)
+    .mount('#app');
