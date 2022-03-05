@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import App from './app.vue';
+import App from './app-test.vue';
 import './registerServiceWorker';
 
 import DiceValue from '@/components/dice-value.vue';
