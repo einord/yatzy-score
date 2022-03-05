@@ -8,8 +8,11 @@
 </div>
 <div v-if="players.length < 1" class="value">&nbsp;</div>
 <div v-for="(player, index) in players" :key="index" class="value">
-    <input v-if="playerValue != null" type="number" :max="maximum" :min="0" v-model="(player as any)[playerValue]" />
-    <template v-if="value != null">{{ value(player) }}</template>
+    <input v-if="playerValue != null" type="number" inputmode="numeric" :max="maximum" :min="0" :value="getPlayerValue" @change="setPlayerValue(player, $event)" />
+    <template v-if="value != null">
+        <template v-if="typeof value(player) === 'boolean'"><input type="checkbox" v-model="player.yahtzee"/></template>
+        <template v-else>{{ value(player) }}</template>
+    </template>
 </div>
 </template>
 
@@ -21,11 +24,26 @@ const props = defineProps<{
     title?: string | number;
     maximum?: number;
     playerValue?: string;
-    value?: (player: Player) => string | number | undefined;
+    value?: (player: Player) => string | number | undefined | boolean;
 }>();
 
 const players = ref<Player[]>([]);
 const titleIsNumber = computed(() => typeof props.title === 'number');
+
+const getPlayerValue = (player: any) => {
+    if (props.playerValue == null) { return undefined; }
+
+    const value = player[props.playerValue];
+    if (typeof value === 'number') { return value; }
+    else { return undefined; }
+};
+
+const setPlayerValue = (player: any, e: Event) => {
+    if (props.playerValue == null) { return; }
+
+    const newValueString = (e.target as HTMLInputElement).value;
+    player[props.playerValue] = parseInt(newValueString);
+}
 
 watchEffect(() => {
     players.value = gameStore.getPlayers();

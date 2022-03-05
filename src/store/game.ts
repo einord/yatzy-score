@@ -18,7 +18,7 @@ export interface Player {
     largeStraight?: number;
     fullHouse?: number;
     chance?: number;
-    yahtzee?: boolean;
+    yahtzee: boolean;
 }
 
 /**
@@ -36,12 +36,19 @@ class Store extends StoreBase<GameStore> {
     protected data(): GameStore {
         return {
             players: [
-                { name: 'Bastian' },
-                { name: 'Jonte' },
-                { name: 'Jojjo' },
-                { name: 'Petra' }
+                { name: 'Bastian', yahtzee: false },
+                { name: 'Jonte', yahtzee: false },
+                { name: 'Jojjo', yahtzee: false },
+                { name: 'Petra', yahtzee: false }
             ]
         };
+    }
+
+    /**
+     * Determines if there are any players.
+     */
+    hasPlayers() {
+        return (this.state.players?.length ?? 0) > 0;
     }
 
     /**

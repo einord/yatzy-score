@@ -66,14 +66,13 @@ const playerBonuses = (player: Player) => {
         : topRowSum >= 63 ? 50 : 0;
 }
 const playerYahtzee = (player: Player) => {
-    return player.yahtzee == null ? undefined
-        : player.yahtzee == true ? 50 : 0;
+    return player.yahtzee;
 }
 
 const playerTotalPoints = (player: Player) => {
     if (player.aces == null || player.twos == null || player.threes == null || player.fours == null || player.fives == null || player.sixes == null
         || player.pair == null || player.twoPairs == null || player.threeOfAKind == null || player.fourOfAKind == null || player.smallStraight == null || player.largeStraight == null
-        || player.fullHouse == null || player.chance == null || player.yahtzee == null) {
+        || player.fullHouse == null || player.chance == null) {
         return undefined;
     }
 
@@ -91,7 +90,7 @@ const playerTotalPoints = (player: Player) => {
         + player.largeStraight
         + player.fullHouse
         + player.chance
-        + playerYahtzee(player)!;
+        + (playerYahtzee(player) === true ? 50 : 0);
 }
 
 watchEffect(() => {
