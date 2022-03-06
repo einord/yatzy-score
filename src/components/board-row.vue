@@ -8,7 +8,7 @@
 </div>
 <div v-if="players.length < 1" class="value">&nbsp;</div>
 <div v-for="(player, index) in players" :key="index" class="value">
-    <input v-if="playerValue != null" type="number" inputmode="numeric" :max="maximum" :min="0" :value="getPlayerValue" @change="setPlayerValue(player, $event)" />
+    <input v-if="playerValue != null" type="number" inputmode="numeric" :max="maximum" :min="0" maxlength="2" :value="getPlayerValue" @change="setPlayerValue(player, $event)" />
     <template v-if="value != null">
         <template v-if="typeof value(player) === 'boolean'"><input type="checkbox" v-model="player.yahtzee"/></template>
         <template v-else>{{ value(player) }}</template>
@@ -42,7 +42,16 @@ const setPlayerValue = (player: any, e: Event) => {
     if (props.playerValue == null) { return; }
 
     const newValueString = (e.target as HTMLInputElement).value;
-    player[props.playerValue] = parseInt(newValueString);
+    let newValue = parseInt(newValueString);
+
+    // Dont let the new value exeed maximum (if set)
+    if (props.maximum != null) {
+        newValue = newValue > props.maximum ? props.maximum : newValue;
+        newValue = newValue < 0 ? 0 : newValue;
+        (e.target as HTMLInputElement).value = newValue.toString();
+    }
+
+    player[props.playerValue] = newValue;
 }
 
 watchEffect(() => {

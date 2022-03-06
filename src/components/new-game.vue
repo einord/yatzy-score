@@ -4,11 +4,11 @@
     <p>Please enter the names of each player</p>
     <div v-for="(playerName, index) in playerNames" :key="index" class="names">
         <div>Player {{ index + 1 }}</div>
-        <input type="text" :value="playerName" @change="updatePlayerName(index, $event)" />
+        <input type="text" maxlength="7" :value="playerName" @change="updatePlayerName(index, $event)" />
     </div>
     <div class="add-player">
         <div>Player {{ playerNames.length + 1 }}</div>
-        <input type="text" :value="newPlayerName" @change="addPlayer" />
+        <input type="text" maxlength="7" :value="newPlayerName" @change="addPlayer" />
     </div>
     <button class="start-button" @click="startGame">Start game</button>
 </div>
