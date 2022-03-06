@@ -73,7 +73,7 @@ watchEffect(() => {
     }
 
     > .maximum {
-        font-size: 0.75em;
+        font-size: 0.65em;
     }
 }
 
@@ -83,6 +83,7 @@ watchEffect(() => {
     justify-content: center;
     border-left: 1px solid $color-grey;
     border-top: 1px solid $color-grey;
+    font-size: 1rem;
 
     > input {
         width: 100%;
@@ -91,6 +92,7 @@ watchEffect(() => {
         color: $color-text;
         border: 0;
         text-align: center;
+        font-size: inherit;
         
         &:focus {
             outline: none;
