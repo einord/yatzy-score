@@ -2,15 +2,15 @@
 <div class="new-game">
     <h1>Welcome to YATZY!</h1>
     <p>Please enter the names of each player</p>
-    <div v-for="(playerName, index) in playerNames" :key="index" class="names">
+    <div v-for="(playerName, index) in playerNames" :key="index" class="names" :class="{ empty: playerName === '' || playerName == null}">
         <div>Player {{ index + 1 }}</div>
-        <input type="text" maxlength="7" :value="playerName" @change="updatePlayerName(index, $event)" />
+        <input placeholder="Add player" type="text" maxlength="7" :value="playerName" @input="updatePlayerName(index, $event)" />
     </div>
-    <div class="add-player">
+    <!-- <div class="add-player">
         <div>Player {{ playerNames.length + 1 }}</div>
-        <input type="text" maxlength="7" :value="newPlayerName" @change="addPlayer" />
-    </div>
-    <button class="start-button" @click="startGame">Start game</button>
+        <input type="text" maxlength="7" :value="newPlayerName" @input="addPlayer" />
+    </div> -->
+    <button class="start-button" @click="startGame" :disabled="playerNames.length < 2">Start game</button>
 </div>
 </template>
 
@@ -18,15 +18,7 @@
 import gameStore from '@/store/game';
 import { ref } from 'vue';
 
-const playerNames = ref<string[]>([]);
-const newPlayerName = ref('');
-
-const addPlayer = (e: Event) => {
-    const value = (e.target as HTMLInputElement).value;
-
-    playerNames.value.push(value);
-    newPlayerName.value = '';
-};
+const playerNames = ref<string[]>(['']);
 
 const updatePlayerName = (index: number, e: Event) => {
     const value = (e.target as HTMLInputElement).value;
@@ -36,6 +28,11 @@ const updatePlayerName = (index: number, e: Event) => {
         playerNames.value.splice(index, 1);
     } else {
         playerNames.value[index] = value;
+    }
+
+    // Add empty input if no empty input element
+    if (playerNames.value.length < 6 && playerNames.value.find(name => name === '') == null) {
+        playerNames.value.push('');
     }
 };
 
@@ -47,12 +44,12 @@ const startGame = () => {
     }
 
     // Add players to store
-    playerNames.value.forEach(name => {
+    for (const playerName of playerNames.value.filter(x => x != null && x !== '')) {
         gameStore.addPlayer({
-            name,
+            name: playerName,
             yahtzee: false
         });
-    });
+    }
 }
 </script>
 
@@ -63,7 +60,7 @@ const startGame = () => {
     align-items: center;
     justify-content: center;
 
-    > .names, >.add-player {
+    > .names {
         display: grid;
         grid-template-columns: auto 1fr;
         max-width: 20rem;
@@ -71,6 +68,10 @@ const startGame = () => {
 
         > div {
             margin-right: 0.5rem;
+        }
+
+        &.empty {
+            opacity: 0.5;
         }
     }
 

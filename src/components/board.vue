@@ -8,7 +8,7 @@
     <board-row :title="4" :maximum="20" player-value="fours" />
     <board-row :title="5" :maximum="25" player-value="fives" />
     <board-row :title="6" :maximum="30" player-value="sixes" />
-    <board-row title="=" :value="sumPlayerTopRows" />
+    <board-row title="=" :value="sumPlayerTopRows" sum />
     <board-row title="Bonus" :maximum="50" :value="playerBonuses" />
     <board-row :title="66" :maximum="12" player-value="pair" />
     <board-row :title="6655" :maximum="22" player-value="twoPairs" />
@@ -19,7 +19,7 @@
     <board-row :title="66444" :maximum="28" player-value="fullHouse" />
     <board-row title="Chance" :maximum="30" player-value="chance" />
     <board-row title="YATZY" :maximum="50" :value="playerYahtzee" />
-    <board-row title="=" :value="playerTotalPoints" />
+    <board-row title="=" :value="playerTotalPoints" sum />
 </div>
 </template>
 
@@ -36,24 +36,56 @@ interface Row {
 
 const titleColumnWidth = '10rem';
 const players = ref<Player[]>([]);
-const topRows = ref<Row[]>([]);
-const topTotals = ref<number[]>([]);
-const bottomRows = ref<Row[]>([]);
 
 const dynamicBoardStyle = ref({
     gridTemplateColumns: `${titleColumnWidth} 1fr`
 });
 
+const getPlayerTopValues = (player: Player) => {
+    return [
+        player.aces,
+        player.twos,
+        player.threes,
+        player.fours,
+        player.fives,
+        player.sixes
+    ];
+};
+
+const getPlayerBottomValues = (player: Player) => {
+    return [
+        player.pair,
+        player.twoPairs,
+        player.threeOfAKind,
+        player.fourOfAKind,
+        player.smallStraight,
+        player.largeStraight,
+        player.fullHouse,
+        player.chance
+    ];
+};
+
+const allValuesAreNumbers = (numbers: any[]) => {
+    for (const value of numbers) {
+        if (value == null || typeof value !== 'number' || value !== value) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 const sumPlayerTopRows = (player: Player) => {
-    if (player.aces == null || player.twos == null || player.threes == null || player.fours == null || player.fives == null || player.sixes == null) {
+    if (!allValuesAreNumbers(getPlayerTopValues(player))) {
         return undefined;
     }
-    return player.aces
-        + player.twos
-        + player.threes
-        + player.fours
-        + player.fives
-        + player.sixes;
+
+    return player.aces!
+        + player.twos!
+        + player.threes!
+        + player.fours!
+        + player.fives!
+        + player.sixes!;
 }
 
 const playerNames = (player: Player) => {
@@ -70,26 +102,24 @@ const playerYahtzee = (player: Player) => {
 }
 
 const playerTotalPoints = (player: Player) => {
-    if (player.aces == null || player.twos == null || player.threes == null || player.fours == null || player.fives == null || player.sixes == null
-        || player.pair == null || player.twoPairs == null || player.threeOfAKind == null || player.fourOfAKind == null || player.smallStraight == null || player.largeStraight == null
-        || player.fullHouse == null || player.chance == null) {
+    if (!allValuesAreNumbers([...getPlayerTopValues(player), ...getPlayerBottomValues(player)])) {
         return undefined;
     }
 
-    return player.aces
-        + player.twos
-        + player.threes
-        + player.fours
-        + player.fives
-        + player.sixes
-        + player.pair
-        + player.twoPairs
-        + player.threeOfAKind
-        + player.fourOfAKind
-        + player.smallStraight
-        + player.largeStraight
-        + player.fullHouse
-        + player.chance
+    return player.aces!
+        + player.twos!
+        + player.threes!
+        + player.fours!
+        + player.fives!
+        + player.sixes!
+        + player.pair!
+        + player.twoPairs!
+        + player.threeOfAKind!
+        + player.fourOfAKind!
+        + player.smallStraight!
+        + player.largeStraight!
+        + player.fullHouse!
+        + player.chance!
         + (playerYahtzee(player) === true ? 50 : 0);
 }
 

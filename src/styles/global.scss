@@ -23,8 +23,9 @@ body {
 
 
 button {
-    background-color: $color-background;
-    border: 1px solid $color-grey;
+    background-color: $color-grey;
+    // border: 1px solid $color-grey;
+    border: none;
     color: $color-text;
     padding: 0.5em;
 }

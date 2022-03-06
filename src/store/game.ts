@@ -35,12 +35,7 @@ class Store extends StoreBase<GameStore> {
 
     protected data(): GameStore {
         return {
-            players: [
-                { name: 'Bastian', yahtzee: false },
-                { name: 'Jonte', yahtzee: false },
-                { name: 'Jojjo', yahtzee: false },
-                { name: 'Petra', yahtzee: false }
-            ]
+            players: []
         };
     }
 

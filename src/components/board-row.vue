@@ -1,17 +1,17 @@
 <template>
-<div class="title" :class="{ simple: maximum == null}">
+<div class="title" :class="{ simple: maximum == null, sum}">
     <div class="text">
         <dice v-if="titleIsNumber">{{ title }}</dice>
         <span v-else>{{ title }}</span>
     </div>
     <div class="maximum" v-if="maximum != null">{{ maximum }}</div>
 </div>
-<div v-if="players.length < 1" class="value">&nbsp;</div>
-<div v-for="(player, index) in players" :key="index" class="value">
+<div v-if="players.length < 1" class="value" :class="{ sum }">&nbsp;</div>
+<div v-for="(player, index) in players" :key="index" class="value" :class="{ sum }">
     <input v-if="playerValue != null" type="number" inputmode="numeric" :max="maximum" :min="0" maxlength="2" :value="getPlayerValue" @change="setPlayerValue(player, $event)" />
     <template v-if="value != null">
-        <template v-if="typeof value(player) === 'boolean'"><input type="checkbox" v-model="player.yahtzee"/></template>
-        <template v-else>{{ value(player) }}</template>
+        <template v-if="typeof value(player) === 'boolean'"><checkbox v-model="player.yahtzee"/></template>
+        <template v-else>{{ value(player) ?? '' }}</template>
     </template>
 </div>
 </template>
@@ -20,12 +20,15 @@
 import gameStore, { Player } from '@/store/game';
 import { computed, ref, watchEffect } from 'vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     title?: string | number;
     maximum?: number;
     playerValue?: string;
     value?: (player: Player) => string | number | undefined | boolean;
-}>();
+    sum?: boolean;
+}>(), {
+    sum: false
+});
 
 const players = ref<Player[]>([]);
 const titleIsNumber = computed(() => typeof props.title === 'number');
@@ -72,6 +75,12 @@ watchEffect(() => {
         justify-content: flex-end;
     }
 
+    &.sum {
+        background-color: $color-grey;
+        border-top: 1px solid $color-light-grey;
+        border-bottom: 1px solid $color-light-grey;
+    }
+
     > .maximum {
         font-size: 0.65em;
     }
@@ -85,7 +94,13 @@ watchEffect(() => {
     border-top: 1px solid $color-grey;
     font-size: 1rem;
 
-    > input {
+    &.sum {
+        background-color: $color-grey;
+        border-top: 1px solid $color-light-grey;
+        border-bottom: 1px solid $color-light-grey;
+    }
+
+    > input, > .checkbox {
         width: 100%;
         height: 100%;
         background-color: $color-background;
