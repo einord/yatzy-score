@@ -14,11 +14,11 @@ export interface Player {
     twoPairs?: number;
     threeOfAKind?: number;
     fourOfAKind?: number;
-    smallStraight?: number;
-    largeStraight?: number;
+    smallStraight?: boolean;
+    largeStraight?: boolean;
     fullHouse?: number;
     chance?: number;
-    yahtzee: boolean;
+    yahtzee?: boolean;
 }
 
 /**

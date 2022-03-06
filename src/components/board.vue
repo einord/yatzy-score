@@ -14,11 +14,11 @@
     <board-row :title="6655" :maximum="22" player-value="twoPairs" />
     <board-row :title="333" :maximum="18" player-value="threeOfAKind" />
     <board-row :title="4444" :maximum="24" player-value="fourOfAKind" />
-    <board-row :title="12345" :maximum="15" player-value="smallStraight" />
-    <board-row :title="23456" :maximum="20" player-value="largeStraight" />
+    <board-row :title="12345" :maximum="15" player-value="smallStraight" checkbox />
+    <board-row :title="23456" :maximum="20" player-value="largeStraight" checkbox />
     <board-row :title="66444" :maximum="28" player-value="fullHouse" />
     <board-row title="Chance" :maximum="30" player-value="chance" />
-    <board-row title="YATZY" :maximum="50" :value="playerYahtzee" />
+    <board-row title="YATZY" :maximum="50" player-value="yahtzee" checkbox />
     <board-row title="=" :value="playerTotalPoints" sum />
 </div>
 </template>
@@ -97,8 +97,14 @@ const playerBonuses = (player: Player) => {
     return topRowSum == null ? undefined
         : topRowSum >= 63 ? 50 : 0;
 }
-const playerYahtzee = (player: Player) => {
-    return player.yahtzee;
+
+const playerHas = (player: Player, field: keyof Player) => {
+    const value = player[field];
+    if (value == null || value != value || value === false) {
+        return false;
+    }
+
+    return true;
 }
 
 const playerTotalPoints = (player: Player) => {
@@ -116,11 +122,11 @@ const playerTotalPoints = (player: Player) => {
         + player.twoPairs!
         + player.threeOfAKind!
         + player.fourOfAKind!
-        + player.smallStraight!
-        + player.largeStraight!
+        + (playerHas(player, 'smallStraight') ? 15 : 0)
+        + (playerHas(player, 'largeStraight') ? 20 : 0)
         + player.fullHouse!
         + player.chance!
-        + (playerYahtzee(player) === true ? 50 : 0);
+        + (playerHas(player, 'yahtzee') ? 50 : 0);
 }
 
 watchEffect(() => {

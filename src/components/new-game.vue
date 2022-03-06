@@ -46,8 +46,7 @@ const startGame = () => {
     // Add players to store
     for (const playerName of playerNames.value.filter(x => x != null && x !== '')) {
         gameStore.addPlayer({
-            name: playerName,
-            yahtzee: false
+            name: playerName
         });
     }
 }

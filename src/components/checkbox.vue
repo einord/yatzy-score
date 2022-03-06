@@ -1,22 +1,25 @@
 <template>
 <div class="checkbox" @click="onClick">
-    <div v-if="modelValue === true" class="check"></div>
+    <div v-if="modelValue === true" class="check">{{ value }}</div>
+    <div v-else-if="modelValue === false" class="zero">0</div>
 </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue';
 
 const props = defineProps<{
-    modelValue: boolean;
+    modelValue?: boolean;
+    value: number | string;
 }>();
 
 const emit = defineEmits<{
-    (event: 'update:modelValue', value: boolean): void;
+    (event: 'update:modelValue', value: boolean | undefined): void;
 }>();
 
-const onClick = (event: Event) => {
-    const value = !props.modelValue;
+const onClick = () => {
+    const value = props.modelValue == null ? true
+        : props.modelValue == true ? false
+        : undefined;
     emit('update:modelValue', value);
 }
 
@@ -31,24 +34,5 @@ const onClick = (event: Event) => {
     margin: 0;
     align-items: center;
     justify-content: center;
-    
-    > input {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        margin: 0;
-        visibility: hidden;
-    }
-
-    > .check {
-        width: 1em;
-        height: 1em;
-        z-index: 5;
-        border-radius: 100%;
-        background-color: $color-primary;
-    }
 }
 </style>

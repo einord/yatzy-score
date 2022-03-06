@@ -7,12 +7,11 @@
     <div class="maximum" v-if="maximum != null">{{ maximum }}</div>
 </div>
 <div v-if="players.length < 1" class="value" :class="{ sum }">&nbsp;</div>
-<div v-for="(player, index) in players" :key="index" class="value" :class="{ sum }">
-    <input v-if="playerValue != null" type="number" inputmode="numeric" :max="maximum" :min="0" maxlength="2" :value="getPlayerValue" @change="setPlayerValue(player, $event)" />
-    <template v-if="value != null">
-        <template v-if="typeof value(player) === 'boolean'"><checkbox v-model="player.yahtzee"/></template>
-        <template v-else>{{ value(player) ?? '' }}</template>
-    </template>
+<div v-for="(player, index) in players" :key="index" class="value" :class="{ sum }" :style="{ boxShadow: `0 0 1px 1px ${getCellColor(player)} inset` }">
+    <checkbox v-if="checkbox === true && playerValue != null" v-model="(player as any)[playerValue]" :value="maximum" />
+    <input v-else-if="playerValue != null" type="number" inputmode="numeric" :max="maximum" :min="0" maxlength="2" :value="getPlayerValue(player)" @change="setPlayerValue(player, $event)" />
+    <template v-else-if="value != null">{{ value(player) ?? ' ' }}</template>
+    <template v-else>&nbsp;</template>
 </div>
 </template>
 
@@ -26,8 +25,10 @@ const props = withDefaults(defineProps<{
     playerValue?: string;
     value?: (player: Player) => string | number | undefined | boolean;
     sum?: boolean;
+    checkbox?: boolean;
 }>(), {
-    sum: false
+    sum: false,
+    checkbox: false
 });
 
 const players = ref<Player[]>([]);
@@ -55,6 +56,27 @@ const setPlayerValue = (player: any, e: Event) => {
     }
 
     player[props.playerValue] = newValue;
+}
+
+const getCellColor = (player: any) => {
+    let value: number | undefined = undefined;
+    if (props.checkbox === true && props.playerValue != null) {
+        const checkboxValue = (player as any)[props.playerValue];
+        value = checkboxValue === true ? props.maximum
+            : checkboxValue === false ? 0
+            : undefined;
+    } else {
+        value = getPlayerValue(player);
+    }
+
+    // No value is set yet, skip color calculation
+    if (value == null) { return 'transparent'; }
+
+    // Return color depending on percentage of maximum
+    const percentage = value / props.maximum!;
+    // const color = `hsl(0, 100%, ${(percentage * 70) + 30}%)`; // Red to white
+    const color = `hsl(${(percentage * 100)}, 100%, 40%)`; // Red to green
+    return color;
 }
 
 watchEffect(() => {
@@ -103,7 +125,7 @@ watchEffect(() => {
     > input, > .checkbox {
         width: 100%;
         height: 100%;
-        background-color: $color-background;
+        background-color: transparent;
         color: $color-text;
         border: 0;
         text-align: center;
