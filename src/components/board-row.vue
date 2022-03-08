@@ -72,7 +72,7 @@ const getCellColor = (player: any) => {
 
     // No value is set yet, skip color calculation
     // if (value == null) { return 'transparent'; }
-    if (value == null) { return 'hsl(0, 0%, 30%)'; }
+    if (value == null || value !== value) { return 'hsl(0, 0%, 30%)'; }
 
     // Return color depending on percentage of maximum
     const percentage = value / props.maximum!;
