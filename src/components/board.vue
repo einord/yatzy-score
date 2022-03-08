@@ -58,8 +58,6 @@ const getPlayerBottomValues = (player: Player) => {
         player.twoPairs,
         player.threeOfAKind,
         player.fourOfAKind,
-        player.smallStraight,
-        player.largeStraight,
         player.fullHouse,
         player.chance
     ];
