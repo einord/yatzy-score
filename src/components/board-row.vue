@@ -36,7 +36,7 @@ const players = ref<Player[]>([]);
 const titleIsNumber = computed(() => typeof props.title === 'number');
 
 const getPlayerValue = (player: any) => {
-    if (props.playerValue == null) { return undefined; }
+    if (props.playerValue == null || props.playerValue !== props.playerValue) { return undefined; }
 
     const value = player[props.playerValue];
     if (typeof value === 'number') { return value; }
@@ -48,6 +48,10 @@ const setPlayerValue = (player: any, e: Event) => {
 
     const newValueString = (e.target as HTMLInputElement).value;
     let newValue = parseInt(newValueString);
+    if (newValue !== newValue) {
+        player[props.playerValue] = undefined;
+        return;
+    }
 
     // Dont let the new value exeed maximum (if set)
     if (props.maximum != null) {
