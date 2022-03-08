@@ -1,30 +1,30 @@
 <template>
 <div class="board" :style="dynamicBoardStyle">
     <!-- Top rows -->
-    <board-row title="" :value="playerNames" />
-    <board-row :title="1" :maximum="5" player-value="aces" />
-    <board-row :title="2" :maximum="10" player-value="twos" />
-    <board-row :title="3" :maximum="15" player-value="threes" />
-    <board-row :title="4" :maximum="20" player-value="fours" />
-    <board-row :title="5" :maximum="25" player-value="fives" />
-    <board-row :title="6" :maximum="30" player-value="sixes" />
-    <board-row title="=" :value="sumPlayerTopRows" sum />
-    <board-row title="Bonus" :maximum="50" :value="playerBonuses" />
-    <board-row :title="66" :maximum="12" player-value="pair" />
-    <board-row :title="6655" :maximum="22" player-value="twoPairs" />
-    <board-row :title="333" :maximum="18" player-value="threeOfAKind" />
-    <board-row :title="4444" :maximum="24" player-value="fourOfAKind" />
-    <board-row :title="12345" :maximum="15" player-value="smallStraight" checkbox />
-    <board-row :title="23456" :maximum="20" player-value="largeStraight" checkbox />
-    <board-row :title="66444" :maximum="28" player-value="fullHouse" />
-    <board-row title="Chance" :maximum="30" player-value="chance" />
-    <board-row title="YATZY" :maximum="50" player-value="yahtzee" checkbox />
-    <board-row title="=" :value="playerTotalPoints" sum />
+    <board-row title="" :value="playerNames" :current-player-index="currentPlayerIndex" />
+    <board-row :title="1" :maximum="5" player-value="aces" :current-player-index="currentPlayerIndex" />
+    <board-row :title="2" :maximum="10" player-value="twos" :current-player-index="currentPlayerIndex" />
+    <board-row :title="3" :maximum="15" player-value="threes" :current-player-index="currentPlayerIndex" />
+    <board-row :title="4" :maximum="20" player-value="fours" :current-player-index="currentPlayerIndex" />
+    <board-row :title="5" :maximum="25" player-value="fives" :current-player-index="currentPlayerIndex" />
+    <board-row :title="6" :maximum="30" player-value="sixes" :current-player-index="currentPlayerIndex" />
+    <board-row title="=" :value="sumPlayerTopRows" :current-player-index="currentPlayerIndex" sum />
+    <board-row title="Bonus (63+)" :maximum="50" :value="playerBonuses" :current-player-index="currentPlayerIndex" />
+    <board-row :title="66" :maximum="12" player-value="pair" :current-player-index="currentPlayerIndex" />
+    <board-row :title="6655" :maximum="22" player-value="twoPairs" :current-player-index="currentPlayerIndex" />
+    <board-row :title="333" :maximum="18" player-value="threeOfAKind" :current-player-index="currentPlayerIndex" />
+    <board-row :title="4444" :maximum="24" player-value="fourOfAKind" :current-player-index="currentPlayerIndex" />
+    <board-row :title="12345" :maximum="15" player-value="smallStraight" :current-player-index="currentPlayerIndex" checkbox />
+    <board-row :title="23456" :maximum="20" player-value="largeStraight" :current-player-index="currentPlayerIndex" checkbox />
+    <board-row :title="66444" :maximum="28" player-value="fullHouse" :current-player-index="currentPlayerIndex" />
+    <board-row title="Chance" :maximum="30" player-value="chance" :current-player-index="currentPlayerIndex" />
+    <board-row title="YATZY" :maximum="50" player-value="yahtzee" :current-player-index="currentPlayerIndex" checkbox />
+    <board-row title="=" :value="playerTotalPoints" :current-player-index="currentPlayerIndex" sum />
 </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import gameStore, { Player } from '@/store/game';
 import BoardRow from '@/components/board-row.vue';
 
@@ -34,7 +34,7 @@ interface Row {
     values: (number | string | undefined)[];
 }
 
-const titleColumnWidth = '10rem';
+const titleColumnWidth = '7rem';
 const players = ref<Player[]>([]);
 
 const dynamicBoardStyle = ref({
@@ -125,7 +125,48 @@ const playerTotalPoints = (player: Player) => {
         + player.fullHouse!
         + player.chance!
         + (playerHas(player, 'yahtzee') ? 50 : 0);
+};
+
+const countPlayerUndefinedProps = (player: Player) => {
+    let count = 0;
+    count = count + (player.aces == null ? 1 : 0);
+    count = count + (player.twos == null ? 1 : 0);
+    count = count + (player.threes == null ? 1 : 0);
+    count = count + (player.fours == null ? 1 : 0);
+    count = count + (player.fives == null ? 1 : 0);
+    count = count + (player.sixes == null ? 1 : 0);
+    count = count + (player.pair == null ? 1 : 0);
+    count = count + (player.twoPairs == null ? 1 : 0);
+    count = count + (player.threeOfAKind == null ? 1 : 0);
+    count = count + (player.fourOfAKind == null ? 1 : 0);
+    count = count + (player.smallStraight == null ? 1 : 0);
+    count = count + (player.largeStraight == null ? 1 : 0);
+    count = count + (player.fullHouse == null ? 1 : 0);
+    count = count + (player.chance == null ? 1 : 0);
+    count = count + (player.yahtzee == null ? 1 : 0);
+    
+    return count;
 }
+
+const currentPlayerIndex = computed(() => {
+    const allPlayers = gameStore.getPlayers();
+    if (allPlayers.length == 0) { return undefined; }
+    
+    // Return the first player with the most undefined properties
+    let currentIndex = 0;
+    let currentUndefinedProps = countPlayerUndefinedProps(allPlayers[0]);
+    for (let i = 1; i < allPlayers.length; i++) {
+        const player = allPlayers[i];
+        const undefinedProps = countPlayerUndefinedProps(player);
+        if (undefinedProps > currentUndefinedProps) {
+            currentIndex = i;
+            currentUndefinedProps = undefinedProps;
+        }
+    }
+
+    // Return the player that has the next turn
+    return currentIndex;
+});
 
 watchEffect(() => {
     players.value = gameStore.getPlayers();
@@ -143,5 +184,6 @@ watchEffect(() => {
     display: grid;
     gap: 0;
     padding-bottom: 2rem;
+    overflow: auto;
 }
 </style>

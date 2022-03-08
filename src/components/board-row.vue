@@ -7,9 +7,9 @@
     <div class="maximum" v-if="maximum != null">{{ maximum }}</div>
 </div>
 <div v-if="players.length < 1" class="value" :class="{ sum }">&nbsp;</div>
-<div v-for="(player, index) in players" :key="index" class="value" :class="{ sum }" :style="{ boxShadow: `0 0 1px 1px ${getCellColor(player)} inset` }">
+<div v-for="(player, index) in players" :key="index" class="value" :class="{ sum, current : currentPlayerIndex === index }" :style="{ boxShadow: `0 0 0 0.5px ${getCellColor(player)} inset` }">
     <checkbox v-if="checkbox === true && playerValue != null" v-model="(player as any)[playerValue]" :value="maximum" />
-    <input v-else-if="playerValue != null" type="number" inputmode="numeric" :max="maximum" :min="0" maxlength="2" :value="getPlayerValue(player)" @change="setPlayerValue(player, $event)" />
+    <input v-else-if="playerValue != null" type="number" inputmode="numeric" :max="maximum" :min="0" maxlength="2" :value="getPlayerValue(player)" @change="setPlayerValue(player, $event)" @click="focus" />
     <template v-else-if="value != null">{{ value(player) ?? ' ' }}</template>
     <template v-else>&nbsp;</template>
 </div>
@@ -26,6 +26,7 @@ const props = withDefaults(defineProps<{
     value?: (player: Player) => string | number | undefined | boolean;
     sum?: boolean;
     checkbox?: boolean;
+    currentPlayerIndex?: number;
 }>(), {
     sum: false,
     checkbox: false
@@ -70,18 +71,25 @@ const getCellColor = (player: any) => {
     }
 
     // No value is set yet, skip color calculation
-    if (value == null) { return 'transparent'; }
+    // if (value == null) { return 'transparent'; }
+    if (value == null) { return 'hsl(0, 0%, 30%)'; }
 
     // Return color depending on percentage of maximum
     const percentage = value / props.maximum!;
     // const color = `hsl(0, 100%, ${(percentage * 70) + 30}%)`; // Red to white
-    const color = `hsl(${(percentage * 100)}, 100%, 40%)`; // Red to green
+    const color = `hsl(${(percentage * 100)}, 50%, 60%)`; // Red to green
     return color;
 }
 
 watchEffect(() => {
     players.value = gameStore.getPlayers();
 })
+
+const focus = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    input.focus();
+    input.select();
+}
 </script>
 
 <style lang="scss" scoped>
@@ -90,8 +98,10 @@ watchEffect(() => {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid $color-grey;
-    padding: 0.1rem 0.5rem;
+    // border-top: 1px solid $color-grey;
+    box-shadow: 0 0 0 0.5px $color-grey inset;
+    padding: 0.1rem 0.3rem;
+    font-size: 0.75rem;
 
     &.simple {
         justify-content: flex-end;
@@ -101,10 +111,11 @@ watchEffect(() => {
         background-color: $color-grey;
         border-top: 1px solid $color-light-grey;
         border-bottom: 1px solid $color-light-grey;
+        box-shadow: none;
     }
 
     > .maximum {
-        font-size: 0.65em;
+        font-size: 0.75em;
     }
 }
 
@@ -112,14 +123,24 @@ watchEffect(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-left: 1px solid $color-grey;
-    border-top: 1px solid $color-grey;
+    // border-left: 1px solid $color-grey;
+    // border-top: 1px solid $color-grey;
     font-size: 1rem;
+    box-shadow: 0 0 0 0.5px $color-grey inset;
+
+    &.current {
+        // border-left: 1px solid $color-light-grey;
+        // border-right: 1px solid $color-light-grey;
+        background-color: $color-current-player-background;
+    }
 
     &.sum {
         background-color: $color-grey;
         border-top: 1px solid $color-light-grey;
         border-bottom: 1px solid $color-light-grey;
+        // box-shadow: 0 0 0 0.5px $color-light-grey inset;
+        box-shadow: none;
+        font-weight: bold;
     }
 
     > input, > .checkbox {

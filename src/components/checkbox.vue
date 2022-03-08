@@ -7,16 +7,21 @@
 
 <script setup lang="ts">
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     modelValue?: boolean;
     value: number | string;
-}>();
+    disabled?: boolean
+}>(), {
+    disabled: false
+});
 
 const emit = defineEmits<{
     (event: 'update:modelValue', value: boolean | undefined): void;
 }>();
 
 const onClick = () => {
+    if (props.disabled === true) { return; }
+    
     const value = props.modelValue == null ? true
         : props.modelValue == true ? false
         : undefined;
