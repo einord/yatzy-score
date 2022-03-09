@@ -110,13 +110,21 @@ const playerTotalPoints = (player: Player) => {
         return undefined;
     }
 
-    return player.aces!
+    // Add the top row value points
+    let points = player.aces!
         + player.twos!
         + player.threes!
         + player.fours!
         + player.fives!
-        + player.sixes!
-        + player.pair!
+        + player.sixes!;
+
+    // Add bonus if top values are 63 or more
+    if (points >= 63) {
+        points += 50;
+    }
+
+    // Add the rest of the points
+    points += player.pair!
         + player.twoPairs!
         + player.threeOfAKind!
         + player.fourOfAKind!
@@ -125,6 +133,8 @@ const playerTotalPoints = (player: Player) => {
         + player.fullHouse!
         + player.chance!
         + (playerHas(player, 'yahtzee') ? 50 : 0);
+    
+    return points;
 };
 
 const countPlayerUndefinedProps = (player: Player) => {
