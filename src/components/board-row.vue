@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import gameStore, { Player } from '../store/game';
 import { computed, ref, watchEffect } from 'vue';
+import Checkbox from './checkbox.vue';
 
 const props = withDefaults(defineProps<{
     title?: string | number;
@@ -12,7 +13,8 @@ const props = withDefaults(defineProps<{
     currentPlayerIndex?: number;
 }>(), {
     sum: false,
-    checkbox: false
+    checkbox: false,
+    maximum: 1
 });
 
 const players = ref<Player[]>([]);
@@ -100,7 +102,7 @@ const focus = (e: Event) => {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 0 0 0.5px $color-grey inset;
+    box-shadow: 0 0 0 0.5px var(--color-grey) inset;
     padding: 0.1rem 0.3rem;
     font-size: 0.75rem;
 
@@ -109,9 +111,9 @@ const focus = (e: Event) => {
     }
 
     &.sum {
-        background-color: $color-grey;
-        border-top: 1px solid $color-light-grey;
-        border-bottom: 1px solid $color-light-grey;
+        background-color: var(--color-grey);
+        border-top: 1px solid var(--color-light-grey);
+        border-bottom: 1px solid var(--color-light-grey);
         box-shadow: none;
     }
 
@@ -125,16 +127,16 @@ const focus = (e: Event) => {
     align-items: center;
     justify-content: center;
     font-size: 1rem;
-    box-shadow: 0 0 0 0.5px $color-grey inset;
+    box-shadow: 0 0 0 0.5px var(--color-grey) inset;
 
     &.current {
-        background-color: $color-current-player-background;
+        background-color: var(--color-current-player-background);
     }
 
     &.sum {
-        background-color: $color-grey;
-        border-top: 1px solid $color-light-grey;
-        border-bottom: 1px solid $color-light-grey;
+        background-color: var(--color-grey);
+        border-top: 1px solid var(--color-light-grey);
+        border-bottom: 1px solid var(--color-light-grey);
         box-shadow: none;
         font-weight: bold;
     }
@@ -143,7 +145,7 @@ const focus = (e: Event) => {
         width: 100%;
         height: 100%;
         background-color: transparent;
-        color: $color-text;
+        color: var(--color-text);
         border: 0;
         text-align: center;
         font-size: inherit;

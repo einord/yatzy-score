@@ -4,6 +4,7 @@ import App from './App.vue'
 
 import DiceValue from './components/dice-value.vue';
 import Checkbox from './components/checkbox.vue';
+import { useRegisterSW } from 'virtual:pwa-register/vue'
 
 
 createApp(App)
