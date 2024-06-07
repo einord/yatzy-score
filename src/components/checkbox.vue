@@ -1,10 +1,3 @@
-<template>
-<div class="checkbox" @click="onClick">
-    <div v-if="modelValue === true" class="check">{{ value }}</div>
-    <div v-else-if="modelValue === false" class="zero">0</div>
-</div>
-</template>
-
 <script setup lang="ts">
 
 const props = withDefaults(defineProps<{
@@ -30,7 +23,14 @@ const onClick = () => {
 
 </script>
 
-<style lang="scss" scoped>
+<template>
+<div class="checkbox" @click="onClick">
+    <div v-if="modelValue === true" class="check">{{ value }}</div>
+    <div v-else-if="modelValue === false" class="zero">0</div>
+</div>
+</template>
+
+<style scoped>
 .checkbox {
     display: flex;
     width: 1rem;

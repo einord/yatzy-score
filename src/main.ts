@@ -1,9 +1,10 @@
-import { createApp } from 'vue';
-import App from './app.vue';
-import './registerServiceWorker';
+import { createApp } from 'vue'
+import './style.css'
+import App from './App.vue'
 
-import DiceValue from '@/components/dice-value.vue';
-import Checkbox from '@/components/checkbox.vue';
+import DiceValue from './components/dice-value.vue';
+import Checkbox from './components/checkbox.vue';
+
 
 createApp(App)
     // Global components

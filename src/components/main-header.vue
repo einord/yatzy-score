@@ -1,13 +1,5 @@
-<template>
-<div class="main-header">
-    <button @click="reset">Reset</button>
-    <div class="title">YATZY</div>
-    <div>&nbsp;</div>
-</div>
-</template>
-
 <script setup lang="ts">
-import gameStore from '@/store/game';
+import gameStore from '../store/game';
 
 
 const reset = () => {
@@ -17,7 +9,15 @@ const reset = () => {
 }
 </script>
 
-<style lang="scss" scoped>
+<template>
+<div class="main-header">
+    <button @click="reset">Reset</button>
+    <div class="title">YATZY</div>
+    <div>&nbsp;</div>
+</div>
+</template>
+
+<style scoped>
 .main-header {
     display: grid;
     grid-template-columns: 1fr 3fr 1fr;

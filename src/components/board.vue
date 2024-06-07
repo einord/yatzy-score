@@ -1,32 +1,7 @@
-<template>
-<div class="board" :style="dynamicBoardStyle">
-    <!-- Top rows -->
-    <board-row title="" :value="playerNames" :current-player-index="currentPlayerIndex" />
-    <board-row :title="1" :maximum="5" player-value="aces" :current-player-index="currentPlayerIndex" />
-    <board-row :title="2" :maximum="10" player-value="twos" :current-player-index="currentPlayerIndex" />
-    <board-row :title="3" :maximum="15" player-value="threes" :current-player-index="currentPlayerIndex" />
-    <board-row :title="4" :maximum="20" player-value="fours" :current-player-index="currentPlayerIndex" />
-    <board-row :title="5" :maximum="25" player-value="fives" :current-player-index="currentPlayerIndex" />
-    <board-row :title="6" :maximum="30" player-value="sixes" :current-player-index="currentPlayerIndex" />
-    <board-row title="=" :value="sumPlayerTopRows" :current-player-index="currentPlayerIndex" sum />
-    <board-row title="Bonus (63+)" :maximum="50" :value="playerBonuses" :current-player-index="currentPlayerIndex" />
-    <board-row :title="66" :maximum="12" player-value="pair" :current-player-index="currentPlayerIndex" />
-    <board-row :title="6655" :maximum="22" player-value="twoPairs" :current-player-index="currentPlayerIndex" />
-    <board-row :title="333" :maximum="18" player-value="threeOfAKind" :current-player-index="currentPlayerIndex" />
-    <board-row :title="4444" :maximum="24" player-value="fourOfAKind" :current-player-index="currentPlayerIndex" />
-    <board-row :title="12345" :maximum="15" player-value="smallStraight" :current-player-index="currentPlayerIndex" checkbox />
-    <board-row :title="23456" :maximum="20" player-value="largeStraight" :current-player-index="currentPlayerIndex" checkbox />
-    <board-row :title="66444" :maximum="28" player-value="fullHouse" :current-player-index="currentPlayerIndex" />
-    <board-row title="Chance" :maximum="30" player-value="chance" :current-player-index="currentPlayerIndex" />
-    <board-row title="YATZY" :maximum="50" player-value="yahtzee" :current-player-index="currentPlayerIndex" checkbox />
-    <board-row title="=" :value="playerTotalPoints" :current-player-index="currentPlayerIndex" sum />
-</div>
-</template>
-
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue';
-import gameStore, { Player } from '@/store/game';
-import BoardRow from '@/components/board-row.vue';
+import gameStore, { Player } from '../store/game';
+import BoardRow from './board-row.vue';
 
 interface Row {
     title: string;
@@ -189,7 +164,32 @@ watchEffect(() => {
 
 </script>
 
-<style lang="scss" scoped>
+<template>
+<div class="board" :style="dynamicBoardStyle">
+    <!-- Top rows -->
+    <board-row title="" :value="playerNames" :current-player-index="currentPlayerIndex" />
+    <board-row :title="1" :maximum="5" player-value="aces" :current-player-index="currentPlayerIndex" />
+    <board-row :title="2" :maximum="10" player-value="twos" :current-player-index="currentPlayerIndex" />
+    <board-row :title="3" :maximum="15" player-value="threes" :current-player-index="currentPlayerIndex" />
+    <board-row :title="4" :maximum="20" player-value="fours" :current-player-index="currentPlayerIndex" />
+    <board-row :title="5" :maximum="25" player-value="fives" :current-player-index="currentPlayerIndex" />
+    <board-row :title="6" :maximum="30" player-value="sixes" :current-player-index="currentPlayerIndex" />
+    <board-row title="=" :value="sumPlayerTopRows" :current-player-index="currentPlayerIndex" sum />
+    <board-row title="Bonus (63+)" :maximum="50" :value="playerBonuses" :current-player-index="currentPlayerIndex" />
+    <board-row :title="66" :maximum="12" player-value="pair" :current-player-index="currentPlayerIndex" />
+    <board-row :title="6655" :maximum="22" player-value="twoPairs" :current-player-index="currentPlayerIndex" />
+    <board-row :title="333" :maximum="18" player-value="threeOfAKind" :current-player-index="currentPlayerIndex" />
+    <board-row :title="4444" :maximum="24" player-value="fourOfAKind" :current-player-index="currentPlayerIndex" />
+    <board-row :title="12345" :maximum="15" player-value="smallStraight" :current-player-index="currentPlayerIndex" checkbox />
+    <board-row :title="23456" :maximum="20" player-value="largeStraight" :current-player-index="currentPlayerIndex" checkbox />
+    <board-row :title="66444" :maximum="28" player-value="fullHouse" :current-player-index="currentPlayerIndex" />
+    <board-row title="Chance" :maximum="30" player-value="chance" :current-player-index="currentPlayerIndex" />
+    <board-row title="YATZY" :maximum="50" player-value="yahtzee" :current-player-index="currentPlayerIndex" checkbox />
+    <board-row title="=" :value="playerTotalPoints" :current-player-index="currentPlayerIndex" sum />
+</div>
+</template>
+
+<style scoped>
 .board {
     display: grid;
     gap: 0;
