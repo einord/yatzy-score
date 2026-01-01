@@ -60,11 +60,11 @@ const getCellColor = (player: any) => {
     }
 
     // No value is set yet, skip color calculation
-    if (value == null || value !== value) { return 'hsl(0, 0%, 30%)'; }
+    if (value == null || value !== value) { return 'var(--color-cell-no-value)'; }
 
     // Return color depending on percentage of maximum
     const percentage = value / props.maximum!;
-    const color = `hsl(${(percentage * 100)}, 50%, 60%)`; // Red to green
+    const color = `hsl(${(percentage * 100)}, var(--color-cell-saturation), var(--color-cell-lightness))`; // Red to green
     return color;
 }
 
@@ -88,7 +88,7 @@ const focus = (e: Event) => {
     <div v-if="maximum != null && sum === false && title != null" class="maximum">{{ maximum }}</div>
 </div>
 <div v-if="players.length < 1" class="value" :class="{ sum }">&nbsp;</div>
-<div v-for="(player, index) in players" :key="index" class="value" :class="{ sum, current : currentPlayerIndex === index }" :style="{ boxShadow: `0 0 0 0.5px ${getCellColor(player)} inset` }">
+<div v-for="(player, index) in players" :key="index" class="value" :class="{ sum, current : currentPlayerIndex === index }" :style="{ backgroundColor: getCellColor(player) }">
     <checkbox v-if="checkbox === true && playerValue != null" v-model="(player as any)[playerValue]" :value="maximum" />
     <input v-else-if="playerValue != null" type="number" inputmode="numeric" :max="maximum" :min="0" maxlength="2" :value="getPlayerValue(player)" @change="setPlayerValue(player, $event)" @click="focus" />
     <template v-else-if="value != null">{{ value(player) ?? ' ' }}</template>
