@@ -33,10 +33,10 @@ jobs:
       - name: Deploy via SFTP
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          server: ssh.binero.se
+          server: yatzy.nyqvist.app
           port: 22
-          username: 240226_jonte
+          username: yatzy.nyqvist.app
           password: ${{ secrets.FTP_PASSWORD }}
           local_path: dist/*
-          remote_path: ./yatzy.nyqvist.app/public_html
+          remote_path: ./
           delete: true
