@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import './style.css'
-import App from './app.vue'
+import App from './App.vue'
 
 import DiceValue from './components/dice-value.vue';
 import Checkbox from './components/checkbox.vue';
