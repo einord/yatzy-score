@@ -13,8 +13,8 @@ export default defineConfig({
                 name: 'YATZY score board',
                 short_name: 'YATZY',
                 description: 'Score board for game of YATZY convenient on your phone or browser.',
-                theme_color: '#1a1a1a',
-                background_color: '#1a1a1a',
+                theme_color: '#f8fafc',
+                background_color: '#f8fafc',
                 start_url: '/',
                 display: 'standalone',
                 icons: [

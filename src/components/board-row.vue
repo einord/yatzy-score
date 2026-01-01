@@ -82,7 +82,7 @@ const focus = (e: Event) => {
 <template>
 <div class="title" :class="{ simple: maximum == null, sum}">
     <div class="text">
-        <dice v-if="titleIsNumber">{{ title }}</dice>
+        <dice v-if="titleIsNumber" class="dice-value">{{ title }}</dice>
         <span v-else>{{ title }}</span>
     </div>
     <div v-if="maximum != null && sum === false && title != null" class="maximum">{{ maximum }}</div>
@@ -101,7 +101,8 @@ const focus = (e: Event) => {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: end;
+    gap: 0.25rem;
     box-shadow: 0 0 0 0.5px var(--color-grey) inset;
     padding: 0.1rem 0.3rem;
     font-size: 0.75rem;
