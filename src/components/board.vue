@@ -184,7 +184,7 @@ watchEffect(() => {
 <template>
 <div class="board" :style="dynamicBoardStyle">
     <!-- Top rows -->
-    <board-row :value="playerNames" :current-player-index="currentPlayerIndex" />
+    <board-row :is-header="true" :value="playerNames" :current-player-index="currentPlayerIndex" />
     <board-row :title="1" :maximum="5" player-value="aces" :current-player-index="currentPlayerIndex" />
     <board-row :title="2" :maximum="10" player-value="twos" :current-player-index="currentPlayerIndex" />
     <board-row :title="3" :maximum="15" player-value="threes" :current-player-index="currentPlayerIndex" />
@@ -210,7 +210,7 @@ watchEffect(() => {
 .board {
     display: grid;
     gap: 0;
-    padding-bottom: 2rem;
+    /* padding-bottom: 2rem; */
     overflow: auto;
 }
 </style>

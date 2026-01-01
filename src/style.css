@@ -15,7 +15,8 @@
     --color-grey: hsl(220, 16%, 90%);
     --color-dark-grey: hsl(220, 9%, 46%);
     --color-background: hsl(210, 40%, 95%);
-    --color-current-player-background: hsla(42, 94%, 60%, 0.2);
+    --color-current-player-background: var(--color-text);
+    --color-current-player-color: var(--color-background);
 
     --color-cell-no-value: transparent;
     --color-cell-saturation: 50%;
@@ -30,7 +31,8 @@
         --color-grey: hsl(0, 0%, 30%);
         --color-dark-grey: hsl(0, 0%, 12%);
         --color-background: hsl(0, 0%, 10%);
-        --color-current-player-background: hsla(39.17, 100%, 62.75%, 0.08);
+        --color-current-player-background: var(--color-text);
+        --color-current-player-color: var(--color-background);
         --color-cell-saturation: 20%;
         --color-cell-lightness: 15%;
     }
@@ -60,6 +62,6 @@ body {
 button {
     background-color: var(--color-grey);
     border: none;
-    color: var(--color-text);
     padding: 0.5em;
+    color: inherit;
 }

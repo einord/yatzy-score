@@ -12,10 +12,12 @@ const props = withDefaults(defineProps<{
     sum?: boolean;
     checkbox?: boolean;
     currentPlayerIndex?: number;
+    isHeader?: boolean;
 }>(), {
     sum: false,
     checkbox: false,
-    maximum: 0
+    maximum: 0,
+    isHeader: false
 });
 
 const players = computed<Player[]>(() => gameStore.getPlayers());
@@ -83,7 +85,9 @@ const setPlayerValue = (player: any, dice: number[] | undefined) => {
     }
 };
 
-const getCellColor = (player: any) => {
+const getCellColor = (player: Player, index: number) => {
+    if (props.isHeader === true && index === props.currentPlayerIndex) { return 'var(--color-current-player-background)'; }
+
     let value: number | undefined = undefined;
     if (props.checkbox === true && props.playerValue != null) {
         const checkboxValue = (player as any)[props.playerValue];
@@ -99,6 +103,7 @@ const getCellColor = (player: any) => {
 
     // No value is set yet, skip color calculation
     if (value == null || value !== value) { return 'var(--color-cell-no-value)'; }
+
 
     if (value === 0) {
         return 'var(--color-text)';
@@ -165,8 +170,8 @@ const isStruck = (player: any) => fieldKey.value != null && player?.struck?.[fie
     v-for="(player, index) in players"
     :key="index"
     class="value"
-    :class="{ sum, current : currentPlayerIndex === index, struck: isStruck(player) }"
-    :style="{ backgroundColor: getCellColor(player) }"
+    :class="{ sum, current : currentPlayerIndex === index, struck: isStruck(player), player: value != null }"
+    :style="{ backgroundColor: getCellColor(player, index) }"
 >
     <checkbox v-if="checkbox === true && playerValue != null" v-model="(player as any)[playerValue]" :value="maximum" />
     <button
@@ -233,16 +238,16 @@ const isStruck = (player: any) => fieldKey.value != null && player?.struck?.[fie
     font-size: 1rem;
     box-shadow: 0 0 0 0.5px var(--color-grey) inset;
 
-    &.current {
-        background-color: var(--color-current-player-background);
-    }
-
     &.sum {
         background-color: var(--color-grey);
         border-top: 1px solid var(--color-light-grey);
         border-bottom: 1px solid var(--color-light-grey);
         box-shadow: none;
         font-weight: bold;
+    }
+
+    &.player.current {
+        color: var(--color-current-player-color);
     }
 
     > .checkbox {
@@ -260,7 +265,6 @@ const isStruck = (player: any) => fieldKey.value != null && player?.struck?.[fie
         height: 100%;
         background: transparent;
         border: none;
-        color: var(--color-text);
         font-size: inherit;
         cursor: pointer;
         padding: 0.5rem 0.25rem;
