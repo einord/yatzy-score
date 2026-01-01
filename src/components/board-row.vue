@@ -203,7 +203,7 @@ const isStruck = (player: any) => fieldKey.value != null && player?.struck?.[fie
     justify-content: end;
     gap: 0.25rem;
     box-shadow: 0 0 0 0.5px var(--color-grey) inset;
-    padding: 0.1rem 0.3rem;
+    padding: 0.1rem 0.3rem 0.1rem 0.5rem;
     font-size: 0.75rem;
 
     &.simple {
