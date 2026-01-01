@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import gameStore, { Player } from '../store/game';
-import { computed, ref, watchEffect } from 'vue';
+import gameStore, { Player, ScoreField } from '../store/game';
+import { computed, ref } from 'vue';
 import Checkbox from './checkbox.vue';
+import DicePickerModal from './dice-picker-modal.vue';
 
 const props = withDefaults(defineProps<{
     title?: string | number;
@@ -17,36 +18,70 @@ const props = withDefaults(defineProps<{
     maximum: 0
 });
 
-const players = ref<Player[]>([]);
+const players = computed<Player[]>(() => gameStore.getPlayers());
 const titleIsNumber = computed(() => typeof props.title === 'number');
 
-const getPlayerValue = (player: any) => {
-    if (props.playerValue == null || props.playerValue !== props.playerValue) { return undefined; }
+const fieldKey = computed<ScoreField | undefined>(() => props.playerValue as ScoreField | undefined);
 
-    const value = player[props.playerValue];
-    if (typeof value === 'number') { return value; }
-    else { return undefined; }
+const score = (value: any): number | undefined => {
+    if (value == null || value !== value) { return undefined; }
+    if (Array.isArray(value)) {
+        if (value.length === 0) { return undefined; }
+        return value.reduce((acc, curr) => acc + (typeof curr === 'number' ? curr : 0), 0);
+    }
+    return typeof value === 'number' ? value : undefined;
 };
 
-const setPlayerValue = (player: any, e: Event) => {
-    if (props.playerValue == null) { return; }
+const getPlayerValue = (player: any) => {
+    if (fieldKey.value == null) { return undefined; }
+    if (player?.struck?.[fieldKey.value]) { return 0; }
+    const value = player[fieldKey.value];
+    return score(value);
+};
 
-    const newValueString = (e.target as HTMLInputElement).value;
-    let newValue = parseInt(newValueString);
-    if (newValue !== newValue) {
-        player[props.playerValue] = undefined;
+const getPlayerDice = (player: any): number[] | undefined => {
+    if (fieldKey.value == null) { return undefined; }
+    if (player?.struck?.[fieldKey.value]) { return []; }
+    const value = player[fieldKey.value];
+    if (Array.isArray(value)) { return value; }
+    if (typeof value === 'number') {
+        // Fallback: greedy split legacy value
+        let remaining = value;
+        const dice: number[] = [];
+        for (const face of [6,5,4,3,2,1]) {
+            while (remaining - face >= 0 && dice.length < 5) {
+                dice.push(face);
+                remaining -= face;
+            }
+        }
+        return dice;
+    }
+    return undefined;
+};
+
+const setPlayerValue = (player: any, dice: number[] | undefined) => {
+    if (fieldKey.value == null) { return; }
+
+    if (dice == null || dice.length === 0) {
+        player[fieldKey.value] = undefined;
+        if (player.struck) {
+            delete player.struck[fieldKey.value];
+        }
         return;
     }
 
-    // Dont let the new value exeed maximum (if set)
+    let total = score(dice) ?? 0;
     if (props.maximum != null) {
-        newValue = newValue > props.maximum ? props.maximum : newValue;
-        newValue = newValue < 0 ? 0 : newValue;
-        (e.target as HTMLInputElement).value = newValue.toString();
+        total = total > props.maximum ? props.maximum : total;
+        total = total < 0 ? 0 : total;
     }
 
-    player[props.playerValue] = newValue;
-}
+    // Store the dice values so we can rehydrate exact combination.
+    player[fieldKey.value] = dice.slice(0, 5);
+    if (player.struck) {
+        delete player.struck[fieldKey.value];
+    }
+};
 
 const getCellColor = (player: any) => {
     let value: number | undefined = undefined;
@@ -57,10 +92,17 @@ const getCellColor = (player: any) => {
             : undefined;
     } else {
         value = getPlayerValue(player);
+        if (fieldKey.value && player?.struck?.[fieldKey.value]) {
+            return 'var(--color-text)';
+        }
     }
 
     // No value is set yet, skip color calculation
     if (value == null || value !== value) { return 'var(--color-cell-no-value)'; }
+
+    if (value === 0) {
+        return 'var(--color-text)';
+    }
 
     // Return color depending on percentage of maximum
     const percentage = value / props.maximum!;
@@ -68,15 +110,46 @@ const getCellColor = (player: any) => {
     return color;
 }
 
-watchEffect(() => {
-    players.value = gameStore.getPlayers();
-})
 
-const focus = (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    input.focus();
-    input.select();
-}
+const modalOpen = ref(false);
+const editingIndex = ref<number | null>(null);
+const draftDice = ref<number[] | undefined>(undefined);
+
+const openPicker = (playerIndex: number) => {
+    if (props.playerValue == null || props.checkbox) { return; }
+    editingIndex.value = playerIndex;
+    draftDice.value = getPlayerDice(players.value[playerIndex]);
+    modalOpen.value = true;
+};
+
+const closePicker = () => {
+    modalOpen.value = false;
+    editingIndex.value = null;
+};
+
+const confirmPicker = (dice: number[] | undefined) => {
+    if (editingIndex.value == null || props.playerValue == null) {
+        closePicker();
+        return;
+    }
+    const player = players.value[editingIndex.value];
+    setPlayerValue(player, dice);
+    closePicker();
+};
+
+const strikeCell = () => {
+    if (editingIndex.value == null || fieldKey.value == null) {
+        closePicker();
+        return;
+    }
+    const player = players.value[editingIndex.value];
+    player[fieldKey.value] = 0;
+    player.struck = player.struck ?? {};
+    player.struck[fieldKey.value] = true;
+    closePicker();
+};
+
+const isStruck = (player: any) => fieldKey.value != null && player?.struck?.[fieldKey.value] === true;
 </script>
 
 <template>
@@ -88,12 +161,34 @@ const focus = (e: Event) => {
     <div v-if="maximum != null && sum === false && title != null" class="maximum">{{ maximum }}</div>
 </div>
 <div v-if="players.length < 1" class="value" :class="{ sum }">&nbsp;</div>
-<div v-for="(player, index) in players" :key="index" class="value" :class="{ sum, current : currentPlayerIndex === index }" :style="{ backgroundColor: getCellColor(player) }">
+<div
+    v-for="(player, index) in players"
+    :key="index"
+    class="value"
+    :class="{ sum, current : currentPlayerIndex === index, struck: isStruck(player) }"
+    :style="{ backgroundColor: getCellColor(player) }"
+>
     <checkbox v-if="checkbox === true && playerValue != null" v-model="(player as any)[playerValue]" :value="maximum" />
-    <input v-else-if="playerValue != null" type="number" inputmode="numeric" :max="maximum" :min="0" maxlength="2" :value="getPlayerValue(player)" @change="setPlayerValue(player, $event)" @click="focus" />
+    <button
+        v-else-if="playerValue != null"
+        type="button"
+        class="value-button"
+        @click="openPicker(index)"
+    >
+        {{ getPlayerValue(player) ?? ' ' }}
+    </button>
     <template v-else-if="value != null">{{ value(player) ?? ' ' }}</template>
     <template v-else>&nbsp;</template>
 </div>
+
+<dice-picker-modal
+    :open="modalOpen"
+    :initial-dice="draftDice"
+    :category="fieldKey"
+    @cancel="closePicker"
+    @confirm="confirmPicker"
+    @strike="strikeCell"
+/>
 </template>
 
 <style scoped>
@@ -150,7 +245,7 @@ const focus = (e: Event) => {
         font-weight: bold;
     }
 
-    > input, > .checkbox {
+    > .checkbox {
         width: 100%;
         height: 100%;
         background-color: transparent;
@@ -158,9 +253,28 @@ const focus = (e: Event) => {
         border: 0;
         text-align: center;
         font-size: inherit;
-        
-        &:focus {
+    }
+
+    .value-button {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: none;
+        color: var(--color-text);
+        font-size: inherit;
+        cursor: pointer;
+        padding: 0.5rem 0.25rem;
+        transition: transform 120ms ease, background-color 120ms ease;
+
+        &:hover,
+        &:focus-visible {
+            transform: translateY(-1px);
+            background-color: rgba(0, 0, 0, 0.05);
             outline: none;
+        }
+
+        &:active {
+            transform: translateY(0);
         }
     }
 }

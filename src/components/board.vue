@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue';
-import gameStore, { Player } from '../store/game';
+import gameStore, { Player, ScoreField } from '../store/game';
 import BoardRow from './board-row.vue';
 
 const titleColumnWidth = '7rem';
@@ -10,25 +10,40 @@ const dynamicBoardStyle = ref({
     gridTemplateColumns: `${titleColumnWidth} 1fr`
 });
 
+const score = (value: any): number | undefined => {
+    if (value == null || value !== value) { return undefined; }
+    if (Array.isArray(value)) {
+        if (value.length === 0) { return undefined; }
+        const sum = value.reduce((acc, curr) => acc + (typeof curr === 'number' ? curr : 0), 0);
+        return sum;
+    }
+    return typeof value === 'number' ? value : undefined;
+};
+
+const valueFor = (player: Player, field: ScoreField) => {
+    if (player.struck?.[field]) { return 0; }
+    return score((player as any)[field]);
+};
+
 const getPlayerTopValues = (player: Player) => {
     return [
-        player.aces,
-        player.twos,
-        player.threes,
-        player.fours,
-        player.fives,
-        player.sixes
+        valueFor(player, 'aces'),
+        valueFor(player, 'twos'),
+        valueFor(player, 'threes'),
+        valueFor(player, 'fours'),
+        valueFor(player, 'fives'),
+        valueFor(player, 'sixes')
     ];
 };
 
 const getPlayerBottomValues = (player: Player) => {
     return [
-        player.pair,
-        player.twoPairs,
-        player.threeOfAKind,
-        player.fourOfAKind,
-        player.fullHouse,
-        player.chance
+        valueFor(player, 'pair'),
+        valueFor(player, 'twoPairs'),
+        valueFor(player, 'threeOfAKind'),
+        valueFor(player, 'fourOfAKind'),
+        valueFor(player, 'fullHouse'),
+        valueFor(player, 'chance')
     ];
 };
 
@@ -43,16 +58,17 @@ const allValuesAreNumbers = (numbers: any[]) => {
 }
 
 const sumPlayerTopRows = (player: Player) => {
-    if (!allValuesAreNumbers(getPlayerTopValues(player))) {
+    const topValues = getPlayerTopValues(player);
+    if (!allValuesAreNumbers(topValues)) {
         return undefined;
     }
 
-    return player.aces!
-        + player.twos!
-        + player.threes!
-        + player.fours!
-        + player.fives!
-        + player.sixes!;
+    return topValues[0]!
+        + topValues[1]!
+        + topValues[2]!
+        + topValues[3]!
+        + topValues[4]!
+        + topValues[5]!;
 }
 
 const playerNames = (player: Player) => {
@@ -80,12 +96,12 @@ const playerTotalPoints = (player: Player) => {
     }
 
     // Add the top row value points
-    let points = player.aces!
-        + player.twos!
-        + player.threes!
-        + player.fours!
-        + player.fives!
-        + player.sixes!;
+    let points = valueFor(player, 'aces')! 
+        + valueFor(player, 'twos')! 
+        + valueFor(player, 'threes')!
+        + valueFor(player, 'fours')! 
+        + valueFor(player, 'fives')! 
+        + valueFor(player, 'sixes')!;
 
     // Add bonus if top values are 63 or more
     if (points >= 63) {
@@ -93,36 +109,43 @@ const playerTotalPoints = (player: Player) => {
     }
 
     // Add the rest of the points
-    points += player.pair!
-        + player.twoPairs!
-        + player.threeOfAKind!
-        + player.fourOfAKind!
+    points += valueFor(player, 'pair')!
+        + valueFor(player, 'twoPairs')!
+        + valueFor(player, 'threeOfAKind')!
+        + valueFor(player, 'fourOfAKind')!
         + (playerHas(player, 'smallStraight') ? 15 : 0)
         + (playerHas(player, 'largeStraight') ? 20 : 0)
-        + player.fullHouse!
-        + player.chance!
+        + valueFor(player, 'fullHouse')!
+        + valueFor(player, 'chance')!
         + (playerHas(player, 'yahtzee') ? 50 : 0);
     
     return points;
 };
 
+const hasValue = (value: any, struck?: boolean) => {
+    if (struck) { return true; }
+    if (Array.isArray(value)) { return value.length > 0; }
+    if (typeof value === 'number') { return value === value; }
+    return value != null && value !== false;
+};
+
 const countPlayerUndefinedProps = (player: Player) => {
     let count = 0;
-    count = count + (player.aces == null ? 1 : 0);
-    count = count + (player.twos == null ? 1 : 0);
-    count = count + (player.threes == null ? 1 : 0);
-    count = count + (player.fours == null ? 1 : 0);
-    count = count + (player.fives == null ? 1 : 0);
-    count = count + (player.sixes == null ? 1 : 0);
-    count = count + (player.pair == null ? 1 : 0);
-    count = count + (player.twoPairs == null ? 1 : 0);
-    count = count + (player.threeOfAKind == null ? 1 : 0);
-    count = count + (player.fourOfAKind == null ? 1 : 0);
-    count = count + (player.smallStraight == null ? 1 : 0);
-    count = count + (player.largeStraight == null ? 1 : 0);
-    count = count + (player.fullHouse == null ? 1 : 0);
-    count = count + (player.chance == null ? 1 : 0);
-    count = count + (player.yahtzee == null ? 1 : 0);
+    count = count + (hasValue(player.aces, player.struck?.aces) ? 0 : 1);
+    count = count + (hasValue(player.twos, player.struck?.twos) ? 0 : 1);
+    count = count + (hasValue(player.threes, player.struck?.threes) ? 0 : 1);
+    count = count + (hasValue(player.fours, player.struck?.fours) ? 0 : 1);
+    count = count + (hasValue(player.fives, player.struck?.fives) ? 0 : 1);
+    count = count + (hasValue(player.sixes, player.struck?.sixes) ? 0 : 1);
+    count = count + (hasValue(player.pair, player.struck?.pair) ? 0 : 1);
+    count = count + (hasValue(player.twoPairs, player.struck?.twoPairs) ? 0 : 1);
+    count = count + (hasValue(player.threeOfAKind, player.struck?.threeOfAKind) ? 0 : 1);
+    count = count + (hasValue(player.fourOfAKind, player.struck?.fourOfAKind) ? 0 : 1);
+    count = count + (hasValue(player.smallStraight) ? 0 : 1);
+    count = count + (hasValue(player.largeStraight) ? 0 : 1);
+    count = count + (hasValue(player.fullHouse, player.struck?.fullHouse) ? 0 : 1);
+    count = count + (hasValue(player.chance, player.struck?.chance) ? 0 : 1);
+    count = count + (hasValue(player.yahtzee) ? 0 : 1);
     
     return count;
 }
