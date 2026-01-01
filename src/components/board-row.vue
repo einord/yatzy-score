@@ -117,6 +117,7 @@ const focus = (e: Event) => {
         border-bottom: 1px solid var(--color-light-grey);
         box-shadow: none;
         text-align: right;
+
         >.text {
             margin-left: auto;
             font-size: 1rem;
@@ -126,6 +127,7 @@ const focus = (e: Event) => {
 
     > .maximum {
         font-size: 0.75em;
+        width: 1rem;
     }
 }
 
