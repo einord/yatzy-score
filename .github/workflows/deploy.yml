@@ -40,3 +40,30 @@ jobs:
           local_path: dist/*
           remote_path: ./
           delete: true
+
+      - name: SFTP Deploy
+        # You may pin to the exact commit or the version.
+        # uses: wlixcc/SFTP-Deploy-Action@a5ccb9c6211a94cc59404f0fdb2a9936a6dfee64
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+        with:
+          # username
+          username: yatzy.nyqvist.app
+          # your sftp server
+          server: yatzy.nyqvist.app
+          # your sftp server port, default to 22
+          port: 22
+          # will put all file under this path
+          local_path: ./dist/*
+          # files will copy to under remote_path
+          remote_path: ./
+          # connection via sftp protocol only
+          sftp_only: true
+          # sftp args
+          # sftpArgs: # optional
+          # This operation will delete all files in the remote path before upload. Please be careful set this to true
+          delete_remote_files: true
+          # SSH passsword，If a password is set, the secret key pair is ignored
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Additional arguments for the rsync command. You can use this parameter to customize the rsync behavior, such as excluding files or directories. Example: '--exclude=node_modules --exclude=.git --exclude=*.log'. If set, these arguments will be passed directly to the rsync command.
+          # rsyncArgs: # optional, default is 
+                
