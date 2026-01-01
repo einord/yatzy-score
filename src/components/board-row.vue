@@ -104,7 +104,7 @@ const getCellColor = (player: Player, index: number) => {
     // No value is set yet, skip color calculation
     if (value == null || value !== value) { return 'var(--color-cell-no-value)'; }
 
-
+    // Zero value is always inverted color
     if (value === 0) {
         return 'var(--color-text)';
     }
@@ -114,7 +114,6 @@ const getCellColor = (player: Player, index: number) => {
     const color = `hsl(${(percentage * 100)}, var(--color-cell-saturation), var(--color-cell-lightness))`; // Red to green
     return color;
 }
-
 
 const modalOpen = ref(false);
 const editingIndex = ref<number | null>(null);
