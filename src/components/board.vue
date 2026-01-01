@@ -212,5 +212,6 @@ watchEffect(() => {
     gap: 0;
     /* padding-bottom: 2rem; */
     overflow: auto;
+    grid-auto-rows: 1fr;
 }
 </style>
