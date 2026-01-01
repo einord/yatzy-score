@@ -23,7 +23,10 @@
         "noFallthroughCasesInSwitch": true,
         "types": [
             "vite-plugin-pwa/vue"
-        ]
+        ],
+        "paths": {
+            "@/*": ["./src/*"]
+        }
     },
     "include": [
         "src/**/*.ts",
