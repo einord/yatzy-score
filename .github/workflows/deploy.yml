@@ -41,15 +41,25 @@ jobs:
       #    remote_path: ./
       #    delete: true
 
+      # - name: SFTP Deploy
+      #   uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+      #   with:
+      #     server: yatzy.nyqvist.app
+      #     username: yatzy.nyqvist.app
+      #     port: 22
+      #     password: ${{ secrets.FTP_PASSWORD }}
+      #     local_path: ./dist/*
+      #     remote_path: /
+      #     sftp_only: true
+      #     delete_remote_files: false
+
+
       - name: SFTP Deploy
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+        uses: appleboy/sftp-action@master
         with:
-          server: yatzy.nyqvist.app
+          host: yatzy.nyqvist.app
           username: yatzy.nyqvist.app
-          port: 22
           password: ${{ secrets.FTP_PASSWORD }}
-          local_path: ./dist/*
-          remote_path: /
-          sftp_only: true
-          delete_remote_files: false
-                
+          port: 22
+          source: "dist/*"
+          target: "."
