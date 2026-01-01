@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<{
 }>(), {
     sum: false,
     checkbox: false,
-    maximum: 1
+    maximum: 0
 });
 
 const players = ref<Player[]>([]);
@@ -85,7 +85,7 @@ const focus = (e: Event) => {
         <dice v-if="titleIsNumber">{{ title }}</dice>
         <span v-else>{{ title }}</span>
     </div>
-    <div class="maximum" v-if="maximum != null">{{ maximum }}</div>
+    <div v-if="maximum != null && sum === false && title != null" class="maximum">{{ maximum }}</div>
 </div>
 <div v-if="players.length < 1" class="value" :class="{ sum }">&nbsp;</div>
 <div v-for="(player, index) in players" :key="index" class="value" :class="{ sum, current : currentPlayerIndex === index }" :style="{ boxShadow: `0 0 0 0.5px ${getCellColor(player)} inset` }">
@@ -115,6 +115,12 @@ const focus = (e: Event) => {
         border-top: 1px solid var(--color-light-grey);
         border-bottom: 1px solid var(--color-light-grey);
         box-shadow: none;
+        text-align: right;
+        >.text {
+            margin-left: auto;
+            font-size: 1rem;
+            font-weight: bold;
+        }
     }
 
     > .maximum {
