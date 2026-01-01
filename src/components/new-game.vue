@@ -1,21 +1,5 @@
-<template>
-<div class="new-game">
-    <h1>Welcome to YATZY!</h1>
-    <p>Please enter the names of each player</p>
-    <div v-for="(playerName, index) in playerNames" :key="index" class="names" :class="{ empty: playerName === '' || playerName == null}">
-        <div>Player {{ index + 1 }}</div>
-        <input placeholder="Add player" type="text" maxlength="7" :value="playerName" @input="updatePlayerName(index, $event)" />
-    </div>
-    <!-- <div class="add-player">
-        <div>Player {{ playerNames.length + 1 }}</div>
-        <input type="text" maxlength="7" :value="newPlayerName" @input="addPlayer" />
-    </div> -->
-    <button class="start-button" @click="startGame" :disabled="playerNames.length < 2">Start game</button>
-</div>
-</template>
-
 <script setup lang="ts">
-import gameStore from '@/store/game';
+import gameStore from '../store/game';
 import { ref } from 'vue';
 
 const playerNames = ref<string[]>(['']);
@@ -52,7 +36,23 @@ const startGame = () => {
 }
 </script>
 
-<style lang="scss" scoped>
+<template>
+<div class="new-game">
+    <h1>Welcome to YATZY!</h1>
+    <p>Please enter the names of each player</p>
+    <div v-for="(playerName, index) in playerNames" :key="index" class="names" :class="{ empty: playerName === '' || playerName == null}">
+        <div>Player {{ index + 1 }}</div>
+        <input placeholder="Add player" type="text" maxlength="7" :value="playerName" @input="updatePlayerName(index, $event)" />
+    </div>
+    <!-- <div class="add-player">
+        <div>Player {{ playerNames.length + 1 }}</div>
+        <input type="text" maxlength="7" :value="newPlayerName" @input="addPlayer" />
+    </div> -->
+    <button class="start-button" @click="startGame" :disabled="playerNames.length < 2">Start game</button>
+</div>
+</template>
+
+<style scoped>
 .new-game {
     display: flex;
     flex-direction: column;

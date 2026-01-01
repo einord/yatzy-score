@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;600&display=swap');
+
+@font-face {
+    font-family: 'dice';
+    src: url('./assets/fonts/dice.ttf') format('truetype');
+}
+
+:root {
+    color-scheme: light;
+    --color-primary: hsl(29, 95%, 42%);
+
+    /* Light theme */
+    --color-text: hsl(216, 6%, 30%);
+    --color-light-grey: hsl(220, 16%, 70%);
+    --color-grey: hsl(220, 16%, 90%);
+    --color-dark-grey: hsl(220, 9%, 46%);
+    --color-background: hsl(210, 40%, 95%);
+    --color-current-player-background: hsla(42, 94%, 60%, 0.2);
+
+    --color-cell-no-value: transparent;
+    --color-cell-saturation: 50%;
+    --color-cell-lightness: 75%;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+        --color-text: hsl(0, 0%, 70%);
+        --color-light-grey: hsl(0, 0%, 50%);
+        --color-grey: hsl(0, 0%, 30%);
+        --color-dark-grey: hsl(0, 0%, 12%);
+        --color-background: hsl(0, 0%, 10%);
+        --color-current-player-background: hsla(39.17, 100%, 62.75%, 0.08);
+        --color-cell-saturation: 20%;
+        --color-cell-lightness: 15%;
+    }
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Fredoka', sans-serif;
+    text-align: center;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    margin: 0;
+    padding: 0;
+    font-size: 18px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+
+button {
+    background-color: var(--color-grey);
+    border: none;
+    color: var(--color-text);
+    padding: 0.5em;
+}

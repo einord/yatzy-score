@@ -23,7 +23,7 @@ export abstract class StoreBase<T extends Record<string, any>> {
 
     protected abstract data(): T;
 
-    protected setup(data: T): void { }
+    protected setup(_data: T): void {}
 
     /**
      * Gets the state as read only, and can not be mutated.

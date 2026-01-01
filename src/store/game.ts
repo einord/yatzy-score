@@ -4,22 +4,37 @@ export interface Player {
     name: string;
 
     // Points
-    aces?: number;
-    twos?: number;
-    threes?: number;
-    fours?: number;
-    fives?: number;
-    sixes?: number;
-    pair?: number;
-    twoPairs?: number;
-    threeOfAKind?: number;
-    fourOfAKind?: number;
+    aces?: number | number[];
+    twos?: number | number[];
+    threes?: number | number[];
+    fours?: number | number[];
+    fives?: number | number[];
+    sixes?: number | number[];
+    pair?: number | number[];
+    twoPairs?: number | number[];
+    threeOfAKind?: number | number[];
+    fourOfAKind?: number | number[];
     smallStraight?: boolean;
     largeStraight?: boolean;
-    fullHouse?: number;
-    chance?: number;
+    fullHouse?: number | number[];
+    chance?: number | number[];
     yahtzee?: boolean;
+    struck?: Partial<Record<ScoreField, boolean>>;
 }
+
+export type ScoreField =
+    | 'aces'
+    | 'twos'
+    | 'threes'
+    | 'fours'
+    | 'fives'
+    | 'sixes'
+    | 'pair'
+    | 'twoPairs'
+    | 'threeOfAKind'
+    | 'fourOfAKind'
+    | 'fullHouse'
+    | 'chance';
 
 /**
  * The global store interface.
