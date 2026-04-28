@@ -3,7 +3,7 @@ import { computed, ref, watchEffect } from 'vue';
 import gameStore, { Player, ScoreField } from '../store/game';
 import BoardRow from './board-row.vue';
 
-const titleColumnWidth = '7rem';
+const titleColumnWidth = 'max-content';
 const players = ref<Player[]>([]);
 
 const dynamicBoardStyle = ref({
@@ -203,6 +203,9 @@ const winningPlayers = computed(() => {
 const currentPlayerIndex = computed(() => {
     const allPlayers = gameStore.getPlayers();
     if (allPlayers.length == 0) { return undefined; }
+
+    // No one has the next turn once every cell is filled
+    if (allPlayers.every(p => countPlayerUndefinedProps(p) === 0)) { return undefined; }
 
     // Return the first player with the most undefined properties
     let currentIndex = 0;

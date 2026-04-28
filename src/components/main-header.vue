@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import gameStore from '../store/game';
 
+
+const title = computed(() => gameStore.isMaxi() ? 'MAXI-YATZY' : 'YATZY');
 
 const reset = () => {
     if (confirm('Are you sure you want to reset the game?')) {
@@ -12,7 +15,7 @@ const reset = () => {
 <template>
 <div class="main-header">
     <button @click="reset">Reset</button>
-    <div class="title">YATZY</div>
+    <div class="title">{{ title }}</div>
     <div>&nbsp;</div>
 </div>
 </template>
