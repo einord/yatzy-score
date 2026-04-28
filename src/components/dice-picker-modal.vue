@@ -27,7 +27,13 @@ const sum = computed(() => selectedValues.value.reduce((acc, curr) => acc + curr
 
 const rules = computed(() => {
     if (!props.category) {
-        return { disabledFaces: new Set<number>(), maxDice };
+        return {
+            disabledFaces: new Set<number>(),
+            maxDice,
+            addCount: 1,
+            autoFill: [] as number[],
+            isValid: false
+        };
     }
     return diceRules(props.category, selectedValues.value);
 });
@@ -49,17 +55,44 @@ watch(() => props.open, (isOpen) => {
 });
 
 const addDie = (value: number) => {
-    if (selected.value.length >= rules.value.maxDice) { return; }
     if (rules.value.disabledFaces.has(value)) { return; }
-    selected.value = [...selected.value, { id: dieId++, value }];
+    const count = rules.value.addCount;
+    if (selected.value.length + count > rules.value.maxDice) { return; }
+
+    const next = [...selected.value];
+    for (let i = 0; i < count; i++) {
+        next.push({ id: dieId++, value });
+    }
+    selected.value = next;
+
+    // Auto-fill remaining dice when the configuration is forced (e.g., full house with 4 dice as 3+1).
+    const autoFill = rules.value.autoFill;
+    if (autoFill.length > 0) {
+        const filled = [...selected.value];
+        for (const v of autoFill) {
+            filled.push({ id: dieId++, value: v });
+        }
+        selected.value = filled;
+    }
 };
 
 const removeDie = (id: number) => {
-    selected.value = selected.value.filter(d => d.id !== id);
+    const die = selected.value.find(d => d.id === id);
+    if (!die) { return; }
+    if (rules.value.addCount > 1) {
+        selected.value = selected.value.filter(d => d.value !== die.value);
+    } else {
+        selected.value = selected.value.filter(d => d.id !== id);
+    }
 };
 
 const confirm = () => {
-    emit('confirm', selected.value.length === 0 ? undefined : selectedValues.value);
+    if (!rules.value.isValid) { return; }
+    emit('confirm', selectedValues.value);
+};
+
+const clear = () => {
+    emit('confirm', undefined);
 };
 
 const cancel = () => emit('cancel');
@@ -109,8 +142,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown));
 
                 <footer>
                     <button type="button" class="ghost" @click="emit('strike')">Cross out (0 p)</button>
+                    <button type="button" class="ghost" @click="clear">Clear</button>
                     <button type="button" class="ghost" @click="cancel">Cancel</button>
-                    <button type="button" class="primary" @click="confirm">Save</button>
+                    <button type="button" class="primary" :disabled="!rules.isValid" @click="confirm">Save</button>
                 </footer>
             </div>
         </transition>
@@ -230,11 +264,16 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown));
                 cursor: pointer;
                 transition: transform 120ms ease, box-shadow 120ms ease;
 
-                &:hover,
-                &:focus-visible {
+                &:hover:not(:disabled),
+                &:focus-visible:not(:disabled) {
                     transform: translateY(-1px);
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
                     outline: none;
+                }
+
+                &:disabled {
+                    opacity: 0.4;
+                    cursor: not-allowed;
                 }
 
                 &.primary {
