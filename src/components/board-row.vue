@@ -41,6 +41,8 @@ const getPlayerValue = (player: any) => {
     return score(value);
 };
 
+const totalDice = computed(() => gameStore.isMaxi() ? 6 : 5);
+
 const getPlayerDice = (player: any): number[] | undefined => {
     if (fieldKey.value == null) { return undefined; }
     if (player?.struck?.[fieldKey.value]) { return []; }
@@ -51,7 +53,7 @@ const getPlayerDice = (player: any): number[] | undefined => {
         let remaining = value;
         const dice: number[] = [];
         for (const face of [6,5,4,3,2,1]) {
-            while (remaining - face >= 0 && dice.length < 5) {
+            while (remaining - face >= 0 && dice.length < totalDice.value) {
                 dice.push(face);
                 remaining -= face;
             }
@@ -79,7 +81,7 @@ const setPlayerValue = (player: any, dice: number[] | undefined) => {
     }
 
     // Store the dice values so we can rehydrate exact combination.
-    player[fieldKey.value] = dice.slice(0, 5);
+    player[fieldKey.value] = dice.slice(0, totalDice.value);
     if (player.struck) {
         delete player.struck[fieldKey.value];
     }

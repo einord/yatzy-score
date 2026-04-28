@@ -46,19 +46,62 @@ const computeFullHouseAutoFill = (counts: Record<number, number>, total: number)
     return [];
 };
 
-export function diceRules(category: ScoreField, selected: number[]): DiceRulesResult {
+const computeHouseAutoFill = (counts: Record<number, number>, total: number): number[] => {
+    const distinct = Object.keys(counts).length;
+    if (total >= 6 || distinct !== 2) { return []; }
+
+    // With two distinct faces in a 3+3 game, the result is always determined: each face must reach 3.
+    const result: number[] = [];
+    for (const [face, count] of Object.entries(counts)) {
+        const needed = 3 - count;
+        for (let i = 0; i < needed; i++) { result.push(Number(face)); }
+    }
+    return result;
+};
+
+const computeTowerAutoFill = (counts: Record<number, number>, total: number): number[] => {
+    if (total >= 6) { return []; }
+
+    const entries = Object.entries(counts).map(([face, count]) => ({ face: Number(face), count }));
+
+    // As soon as one face reaches 3, it must become the four-of-a-kind. Bump it to 4 (and bump the singleton to 2 if present).
+    const trio = entries.find(e => e.count === 3);
+    if (trio) {
+        const result: number[] = [trio.face];
+        const single = entries.find(e => e.count === 1);
+        if (single) { result.push(single.face); }
+        return result;
+    }
+
+    // 4 + 1 → singleton must become 2
+    if (total === 5) {
+        const four = entries.find(e => e.count === 4);
+        const single = entries.find(e => e.count === 1);
+        if (four && single) { return [single.face]; }
+    }
+
+    return [];
+};
+
+export function diceRules(category: ScoreField, selected: number[], maxi: boolean = false): DiceRulesResult {
     const counts = faceCounts(selected);
     const distinct = Object.keys(counts).length;
     const total = selected.length;
+
+    const totalDice = maxi ? 6 : 5;
 
     const maxDice = (() => {
         switch (category) {
             case 'pair': return 2;
             case 'twoPairs': return 4;
+            case 'threePairs': return 6;
             case 'threeOfAKind': return 3;
             case 'fourOfAKind': return 4;
+            case 'fiveOfAKind': return 5;
             case 'fullHouse': return 5;
-            default: return 5;
+            case 'house': return 6;
+            case 'tower': return 6;
+            default: return totalDice;
         }
     })();
 
@@ -66,8 +109,10 @@ export function diceRules(category: ScoreField, selected: number[]): DiceRulesRe
         switch (category) {
             case 'pair': return 2;
             case 'twoPairs': return 2;
+            case 'threePairs': return 2;
             case 'threeOfAKind': return 3;
             case 'fourOfAKind': return 4;
+            case 'fiveOfAKind': return 5;
             default: return 1;
         }
     })();
@@ -87,20 +132,37 @@ export function diceRules(category: ScoreField, selected: number[]): DiceRulesRe
             allowed = total === 0;
         } else if (category === 'twoPairs') {
             allowed = total < maxDice && current < 2;
+        } else if (category === 'threePairs') {
+            allowed = total < maxDice && current < 2;
         } else if (category === 'threeOfAKind') {
             allowed = total === 0;
         } else if (category === 'fourOfAKind') {
             allowed = total === 0;
+        } else if (category === 'fiveOfAKind') {
+            allowed = total === 0;
         } else if (category === 'fullHouse') {
             allowed = total < maxDice
                 && current < 3
+                && (distinct < 2 || current > 0);
+        } else if (category === 'house') {
+            allowed = total < maxDice
+                && current < 3
+                && (distinct < 2 || current > 0);
+        } else if (category === 'tower') {
+            allowed = total < maxDice
+                && current < 4
                 && (distinct < 2 || current > 0);
         }
 
         if (!allowed) { disabledFaces.add(face); }
     }
 
-    const autoFill = category === 'fullHouse' ? computeFullHouseAutoFill(counts, total) : [];
+    const autoFill = (() => {
+        if (category === 'fullHouse') { return computeFullHouseAutoFill(counts, total); }
+        if (category === 'house') { return computeHouseAutoFill(counts, total); }
+        if (category === 'tower') { return computeTowerAutoFill(counts, total); }
+        return [];
+    })();
 
     const isValid = (() => {
         if (numericCategories.has(category)) {
@@ -108,15 +170,26 @@ export function diceRules(category: ScoreField, selected: number[]): DiceRulesRe
             return total >= 1 && Object.keys(counts).every(f => Number(f) === target);
         }
         switch (category) {
-            case 'chance': return total === 5;
+            case 'chance': return total === totalDice;
             case 'pair': return total === 2 && distinct === 1;
             case 'twoPairs': return total === 4 && distinct === 2 && Object.values(counts).every(c => c === 2);
+            case 'threePairs': return total === 6 && distinct === 3 && Object.values(counts).every(c => c === 2);
             case 'threeOfAKind': return total === 3 && distinct === 1;
             case 'fourOfAKind': return total === 4 && distinct === 1;
+            case 'fiveOfAKind': return total === 5 && distinct === 1;
             case 'fullHouse': {
                 if (total !== 5 || distinct !== 2) { return false; }
                 const values = Object.values(counts).sort();
                 return values[0] === 2 && values[1] === 3;
+            }
+            case 'house': {
+                if (total !== 6 || distinct !== 2) { return false; }
+                return Object.values(counts).every(c => c === 3);
+            }
+            case 'tower': {
+                if (total !== 6 || distinct !== 2) { return false; }
+                const values = Object.values(counts).sort();
+                return values[0] === 2 && values[1] === 4;
             }
             default: return false;
         }

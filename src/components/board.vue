@@ -10,6 +10,11 @@ const dynamicBoardStyle = ref({
     gridTemplateColumns: `${titleColumnWidth} 1fr`
 });
 
+const isMaxi = computed(() => gameStore.isMaxi());
+const bonusThreshold = computed(() => isMaxi.value ? 76 : 63);
+const yahtzeeValue = computed(() => isMaxi.value ? 100 : 50);
+const fullStraightValue = 21;
+
 const score = (value: any): number | undefined => {
     if (value == null || value !== value) { return undefined; }
     if (Array.isArray(value)) {
@@ -37,13 +42,21 @@ const getPlayerTopValues = (player: Player) => {
 };
 
 const getPlayerBottomValues = (player: Player) => {
-    return [
+    const base = [
         valueFor(player, 'pair'),
         valueFor(player, 'twoPairs'),
         valueFor(player, 'threeOfAKind'),
         valueFor(player, 'fourOfAKind'),
         valueFor(player, 'fullHouse'),
         valueFor(player, 'chance')
+    ];
+    if (!isMaxi.value) { return base; }
+    return [
+        ...base,
+        valueFor(player, 'threePairs'),
+        valueFor(player, 'fiveOfAKind'),
+        valueFor(player, 'house'),
+        valueFor(player, 'tower')
     ];
 };
 
@@ -81,7 +94,7 @@ const playerNames = (player: Player) => {
 const playerBonuses = (player: Player) => {
     const topRowSum = sumPlayerTopRows(player);
     return topRowSum == null ? undefined
-        : topRowSum >= 63 ? 50 : 0;
+        : topRowSum >= bonusThreshold.value ? 50 : 0;
 }
 
 const playerHas = (player: Player, field: keyof Player) => {
@@ -98,20 +111,20 @@ const playerTotalPoints = (player: Player) => {
         return undefined;
     }
 
-    // Add the top row value points
-    let points = valueFor(player, 'aces')! 
-        + valueFor(player, 'twos')! 
+    // Top half
+    let points = valueFor(player, 'aces')!
+        + valueFor(player, 'twos')!
         + valueFor(player, 'threes')!
-        + valueFor(player, 'fours')! 
-        + valueFor(player, 'fives')! 
+        + valueFor(player, 'fours')!
+        + valueFor(player, 'fives')!
         + valueFor(player, 'sixes')!;
 
-    // Add bonus if top values are 63 or more
-    if (points >= 63) {
+    // Top-half bonus
+    if (points >= bonusThreshold.value) {
         points += 50;
     }
 
-    // Add the rest of the points
+    // Bottom half — categories shared by both modes
     points += valueFor(player, 'pair')!
         + valueFor(player, 'twoPairs')!
         + valueFor(player, 'threeOfAKind')!
@@ -120,8 +133,17 @@ const playerTotalPoints = (player: Player) => {
         + (playerHas(player, 'largeStraight') ? 20 : 0)
         + valueFor(player, 'fullHouse')!
         + valueFor(player, 'chance')!
-        + (playerHas(player, 'yahtzee') ? 50 : 0);
-    
+        + (playerHas(player, 'yahtzee') ? yahtzeeValue.value : 0);
+
+    // Maxi-only categories
+    if (isMaxi.value) {
+        points += valueFor(player, 'threePairs')!
+            + valueFor(player, 'fiveOfAKind')!
+            + (playerHas(player, 'fullStraight') ? fullStraightValue : 0)
+            + valueFor(player, 'house')!
+            + valueFor(player, 'tower')!;
+    }
+
     return points;
 };
 
@@ -149,7 +171,15 @@ const countPlayerUndefinedProps = (player: Player) => {
     count = count + (hasValue(player.fullHouse, player.struck?.fullHouse) ? 0 : 1);
     count = count + (hasValue(player.chance, player.struck?.chance) ? 0 : 1);
     count = count + (hasValue(player.yahtzee) ? 0 : 1);
-    
+
+    if (isMaxi.value) {
+        count = count + (hasValue(player.threePairs, player.struck?.threePairs) ? 0 : 1);
+        count = count + (hasValue(player.fiveOfAKind, player.struck?.fiveOfAKind) ? 0 : 1);
+        count = count + (hasValue(player.fullStraight) ? 0 : 1);
+        count = count + (hasValue(player.house, player.struck?.house) ? 0 : 1);
+        count = count + (hasValue(player.tower, player.struck?.tower) ? 0 : 1);
+    }
+
     return count;
 }
 
@@ -173,7 +203,7 @@ const winningPlayers = computed(() => {
 const currentPlayerIndex = computed(() => {
     const allPlayers = gameStore.getPlayers();
     if (allPlayers.length == 0) { return undefined; }
-    
+
     // Return the first player with the most undefined properties
     let currentIndex = 0;
     let currentUndefinedProps = countPlayerUndefinedProps(allPlayers[0]);
@@ -203,25 +233,36 @@ watchEffect(() => {
 
 <template>
 <div class="board" :style="dynamicBoardStyle">
-    <!-- Top rows -->
+    <!-- Header -->
     <board-row :is-header="true" :value="playerNames" :current-player-index="currentPlayerIndex" />
-    <board-row :title="1" :maximum="5" player-value="aces" :current-player-index="currentPlayerIndex" />
-    <board-row :title="2" :maximum="10" player-value="twos" :current-player-index="currentPlayerIndex" />
-    <board-row :title="3" :maximum="15" player-value="threes" :current-player-index="currentPlayerIndex" />
-    <board-row :title="4" :maximum="20" player-value="fours" :current-player-index="currentPlayerIndex" />
-    <board-row :title="5" :maximum="25" player-value="fives" :current-player-index="currentPlayerIndex" />
-    <board-row :title="6" :maximum="30" player-value="sixes" :current-player-index="currentPlayerIndex" />
+
+    <!-- Top half: aces .. sixes -->
+    <board-row :title="1" :maximum="isMaxi ? 6 : 5" player-value="aces" :current-player-index="currentPlayerIndex" />
+    <board-row :title="2" :maximum="isMaxi ? 12 : 10" player-value="twos" :current-player-index="currentPlayerIndex" />
+    <board-row :title="3" :maximum="isMaxi ? 18 : 15" player-value="threes" :current-player-index="currentPlayerIndex" />
+    <board-row :title="4" :maximum="isMaxi ? 24 : 20" player-value="fours" :current-player-index="currentPlayerIndex" />
+    <board-row :title="5" :maximum="isMaxi ? 30 : 25" player-value="fives" :current-player-index="currentPlayerIndex" />
+    <board-row :title="6" :maximum="isMaxi ? 36 : 30" player-value="sixes" :current-player-index="currentPlayerIndex" />
     <board-row title="=" :value="sumPlayerTopRows" :current-player-index="currentPlayerIndex" sum />
-    <board-row title="Bonus (63+)" :maximum="50" :value="playerBonuses" :current-player-index="currentPlayerIndex" />
+    <board-row :title="`Bonus (${bonusThreshold}+)`" :maximum="50" :value="playerBonuses" :current-player-index="currentPlayerIndex" />
+
+    <!-- Bottom half -->
     <board-row :title="66" :maximum="12" player-value="pair" :current-player-index="currentPlayerIndex" />
     <board-row :title="6655" :maximum="22" player-value="twoPairs" :current-player-index="currentPlayerIndex" />
+    <board-row v-if="isMaxi" :title="665544" :maximum="30" player-value="threePairs" :current-player-index="currentPlayerIndex" />
     <board-row :title="333" :maximum="18" player-value="threeOfAKind" :current-player-index="currentPlayerIndex" />
     <board-row :title="4444" :maximum="24" player-value="fourOfAKind" :current-player-index="currentPlayerIndex" />
+    <board-row v-if="isMaxi" :title="55555" :maximum="30" player-value="fiveOfAKind" :current-player-index="currentPlayerIndex" />
     <board-row :title="12345" :maximum="15" player-value="smallStraight" :current-player-index="currentPlayerIndex" checkbox />
     <board-row :title="23456" :maximum="20" player-value="largeStraight" :current-player-index="currentPlayerIndex" checkbox />
-    <board-row :title="66444" :maximum="28" player-value="fullHouse" :current-player-index="currentPlayerIndex" />
-    <board-row title="Chance" :maximum="30" player-value="chance" :current-player-index="currentPlayerIndex" />
-    <board-row title="YATZY" :maximum="50" player-value="yahtzee" :current-player-index="currentPlayerIndex" checkbox />
+    <board-row v-if="isMaxi" :title="123456" :maximum="fullStraightValue" player-value="fullStraight" :current-player-index="currentPlayerIndex" checkbox />
+    <board-row :title="66333" :maximum="28" player-value="fullHouse" :current-player-index="currentPlayerIndex" />
+    <board-row v-if="isMaxi" :title="333444" :maximum="33" player-value="house" :current-player-index="currentPlayerIndex" />
+    <board-row v-if="isMaxi" :title="664444" :maximum="34" player-value="tower" :current-player-index="currentPlayerIndex" />
+    <board-row title="Chance" :maximum="isMaxi ? 36 : 30" player-value="chance" :current-player-index="currentPlayerIndex" />
+    <board-row title="YATZY" :maximum="yahtzeeValue" player-value="yahtzee" :current-player-index="currentPlayerIndex" checkbox />
+
+    <!-- Total -->
     <board-row title="=" :value="playerTotalPoints" :current-player-index="currentPlayerIndex" sum />
 </div>
 </template>

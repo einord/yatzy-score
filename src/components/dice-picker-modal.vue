@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-import { ScoreField } from '../store/game';
+import gameStore, { ScoreField } from '../store/game';
 import { diceRules } from '../utils/dice-rules';
 
 const props = defineProps<{
@@ -19,7 +19,8 @@ type DiePick = { id: number; value: number };
 const selected = ref<DiePick[]>([]);
 let dieId = 0;
 
-const maxDice = 5;
+const isMaxi = computed(() => gameStore.isMaxi());
+const maxDice = computed(() => isMaxi.value ? 6 : 5);
 const diceOptions = [1, 2, 3, 4, 5, 6];
 
 const selectedValues = computed(() => selected.value.map(d => d.value));
@@ -29,13 +30,13 @@ const rules = computed(() => {
     if (!props.category) {
         return {
             disabledFaces: new Set<number>(),
-            maxDice,
+            maxDice: maxDice.value,
             addCount: 1,
             autoFill: [] as number[],
             isValid: false
         };
     }
-    return diceRules(props.category, selectedValues.value);
+    return diceRules(props.category, selectedValues.value, isMaxi.value);
 });
 
 const resetFromInitial = () => {
@@ -44,7 +45,7 @@ const resetFromInitial = () => {
         return;
     }
     selected.value = (props.initialDice ?? [])
-        .slice(0, maxDice)
+        .slice(0, maxDice.value)
         .map(v => ({ id: dieId++, value: v }));
 };
 
