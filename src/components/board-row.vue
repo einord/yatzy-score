@@ -169,7 +169,7 @@ const isStruck = (player: any) => fieldKey.value != null && player?.struck?.[fie
     v-for="(player, index) in players"
     :key="index"
     class="value"
-    :class="{ sum, current : currentPlayerIndex === index, struck: isStruck(player), player: value != null }"
+    :class="{ sum, current : currentPlayerIndex === index, struck: isStruck(player), player: value != null, header: isHeader }"
     :style="{ backgroundColor: getCellColor(player, index) }"
 >
     <checkbox v-if="checkbox === true && playerValue != null" v-model="(player as any)[playerValue]" :value="maximum" />
@@ -245,8 +245,21 @@ const isStruck = (player: any) => fieldKey.value != null && player?.struck?.[fie
         font-weight: bold;
     }
 
-    &.player.current {
+    &.header.current {
         color: var(--color-current-player-color);
+    }
+
+    &.current {
+        box-shadow:
+            inset 3px 0 0 0 var(--color-current-player-background),
+            inset -3px 0 0 0 var(--color-current-player-background),
+            inset 0 0 0 0.5px var(--color-grey);
+    }
+
+    &.current.sum {
+        box-shadow:
+            inset 3px 0 0 0 var(--color-current-player-background),
+            inset -3px 0 0 0 var(--color-current-player-background);
     }
 
     > .checkbox {
