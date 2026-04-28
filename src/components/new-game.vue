@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import gameStore from '../store/game';
-import { ref } from 'vue';
+import gameStore, { GameMode } from '../store/game';
+import { computed, ref } from 'vue';
 
 const playerNames = ref<string[]>(['']);
+
+const filledNames = computed(() => playerNames.value.filter(x => x != null && x !== ''));
+const canStart = computed(() => filledNames.value.length >= 2);
 
 const updatePlayerName = (index: number, e: Event) => {
     const value = (e.target as HTMLInputElement).value;
 
     // Remove player name if no value
-    if (value === '') { 
+    if (value === '') {
         playerNames.value.splice(index, 1);
     } else {
         playerNames.value[index] = value;
@@ -20,15 +23,14 @@ const updatePlayerName = (index: number, e: Event) => {
     }
 };
 
-const startGame = () => {
-    // Validate number of players
-    if (playerNames.value.length < 2) {
+const startGame = (mode: GameMode) => {
+    if (!canStart.value) {
         alert('Please enter at least two player names');
         return;
     }
 
-    // Add players to store
-    for (const playerName of playerNames.value.filter(x => x != null && x !== '')) {
+    gameStore.setMode(mode);
+    for (const playerName of filledNames.value) {
         gameStore.addPlayer({
             name: playerName
         });
@@ -44,11 +46,10 @@ const startGame = () => {
         <div>Player {{ index + 1 }}</div>
         <input placeholder="Add player" type="text" maxlength="7" :value="playerName" @input="updatePlayerName(index, $event)" />
     </div>
-    <!-- <div class="add-player">
-        <div>Player {{ playerNames.length + 1 }}</div>
-        <input type="text" maxlength="7" :value="newPlayerName" @input="addPlayer" />
-    </div> -->
-    <button class="start-button" @click="startGame" :disabled="playerNames.length < 2">Start game</button>
+    <div class="start-buttons">
+        <button class="start-button" @click="startGame('yatzy')" :disabled="!canStart">Start YATZY</button>
+        <button class="start-button maxi" @click="startGame('maxi')" :disabled="!canStart">Start MAXI</button>
+    </div>
 </div>
 </template>
 
@@ -74,8 +75,44 @@ const startGame = () => {
         }
     }
 
-    > .start-button {
-        margin-top: 1rem;
+    > .start-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 1.25rem;
+        width: min(14rem, 100%);
+
+        > .start-button {
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            background-color: var(--color-primary);
+            color: white;
+            cursor: pointer;
+            transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+
+            &:hover:not(:disabled),
+            &:focus-visible:not(:disabled) {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+                outline: none;
+            }
+
+            &:active:not(:disabled) {
+                transform: translateY(0);
+            }
+
+            &:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+
+            &.maxi {
+                background-color: var(--color-grey);
+                color: var(--color-text);
+            }
+        }
     }
 }
 </style>
