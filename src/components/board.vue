@@ -72,6 +72,9 @@ const sumPlayerTopRows = (player: Player) => {
 }
 
 const playerNames = (player: Player) => {
+    if (winningPlayers.value.has(player)) {
+        return `🎉 ${player.name} 🎉`;
+    }
     return player.name;
 }
 
@@ -149,6 +152,23 @@ const countPlayerUndefinedProps = (player: Player) => {
     
     return count;
 }
+
+const winningPlayers = computed(() => {
+    const allPlayers = gameStore.getPlayers();
+    const winners = new Set<Player>();
+    if (allPlayers.length === 0) { return winners; }
+    if (!allPlayers.every(p => countPlayerUndefinedProps(p) === 0)) { return winners; }
+
+    let bestPoints = -Infinity;
+    for (const p of allPlayers) {
+        const points = playerTotalPoints(p) ?? 0;
+        if (points > bestPoints) { bestPoints = points; }
+    }
+    for (const p of allPlayers) {
+        if ((playerTotalPoints(p) ?? 0) === bestPoints) { winners.add(p); }
+    }
+    return winners;
+});
 
 const currentPlayerIndex = computed(() => {
     const allPlayers = gameStore.getPlayers();
