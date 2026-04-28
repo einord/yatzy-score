@@ -46,19 +46,6 @@ const computeFullHouseAutoFill = (counts: Record<number, number>, total: number)
     return [];
 };
 
-const computeHouseAutoFill = (counts: Record<number, number>, total: number): number[] => {
-    const distinct = Object.keys(counts).length;
-    if (total >= 6 || distinct !== 2) { return []; }
-
-    // With two distinct faces in a 3+3 game, the result is always determined: each face must reach 3.
-    const result: number[] = [];
-    for (const [face, count] of Object.entries(counts)) {
-        const needed = 3 - count;
-        for (let i = 0; i < needed; i++) { result.push(Number(face)); }
-    }
-    return result;
-};
-
 const computeTowerAutoFill = (counts: Record<number, number>, total: number): number[] => {
     if (total >= 6) { return []; }
 
@@ -113,6 +100,7 @@ export function diceRules(category: ScoreField, selected: number[], maxi: boolea
             case 'threeOfAKind': return 3;
             case 'fourOfAKind': return 4;
             case 'fiveOfAKind': return 5;
+            case 'house': return 3;
             default: return 1;
         }
     })();
@@ -145,9 +133,7 @@ export function diceRules(category: ScoreField, selected: number[], maxi: boolea
                 && current < 3
                 && (distinct < 2 || current > 0);
         } else if (category === 'house') {
-            allowed = total < maxDice
-                && current < 3
-                && (distinct < 2 || current > 0);
+            allowed = total < maxDice && current === 0;
         } else if (category === 'tower') {
             allowed = total < maxDice
                 && current < 4
@@ -159,7 +145,6 @@ export function diceRules(category: ScoreField, selected: number[], maxi: boolea
 
     const autoFill = (() => {
         if (category === 'fullHouse') { return computeFullHouseAutoFill(counts, total); }
-        if (category === 'house') { return computeHouseAutoFill(counts, total); }
         if (category === 'tower') { return computeTowerAutoFill(counts, total); }
         return [];
     })();
