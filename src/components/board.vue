@@ -126,7 +126,7 @@ const hasValue = (value: any, struck?: boolean) => {
     if (struck) { return true; }
     if (Array.isArray(value)) { return value.length > 0; }
     if (typeof value === 'number') { return value === value; }
-    return value != null && value !== false;
+    return value != null;
 };
 
 const countPlayerUndefinedProps = (player: Player) => {
